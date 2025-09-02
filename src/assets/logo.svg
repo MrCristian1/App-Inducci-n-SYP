@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Fondo circular -->
+  <circle cx="100" cy="100" r="95" fill="#f1faee" stroke="#1d3557" stroke-width="3"/>
+  
+  <!-- Letra S estilizada -->
+  <path d="M80,60 C60,60 50,70 50,85 C50,100 65,105 100,110 C135,115 150,120 150,140 C150,160 130,170 100,170 C70,170 50,160 50,140" 
+        fill="none" stroke="#e63946" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Letra P estilizada -->
+  <path d="M90,40 L90,160 M90,40 C120,40 140,50 140,70 C140,90 120,100 90,100" 
+        fill="none" stroke="#1d3557" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Círculos decorativos -->
+  <circle cx="50" cy="50" r="8" fill="#457b9d"/>
+  <circle cx="150" cy="50" r="8" fill="#457b9d"/>
+  <circle cx="50" cy="150" r="8" fill="#457b9d"/>
+  <circle cx="150" cy="150" r="8" fill="#457b9d"/>
+</svg>

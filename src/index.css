@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-light text-secondary font-sans;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white py-2 px-4 rounded-lg shadow-md hover:bg-opacity-90 transition-all duration-300 flex items-center justify-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-accent text-white py-2 px-4 rounded-lg shadow-md hover:bg-opacity-90 transition-all duration-300 flex items-center justify-center gap-2;
+  }
+  
+  .btn-back {
+    @apply text-secondary p-2 rounded-full hover:bg-gray-200 transition-all duration-300;
+  }
+  
+  .screen {
+    @apply fixed inset-0 flex flex-col items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-500 ease-in-out;
+  }
+  
+  .screen.active {
+    @apply opacity-100 pointer-events-auto;
+  }
+  
+  .level-node {
+    @apply relative flex flex-col items-center cursor-pointer transition-all duration-300;
+  }
+  
+  .level-node-card {
+    @apply flex flex-col items-center cursor-pointer transition-all duration-300 bg-white rounded-xl p-4 shadow-md border-2 border-transparent max-w-[300px];
+  }
+  
+  .level-node-card.locked {
+    @apply opacity-70 cursor-not-allowed bg-gray-100;
+  }
+  
+  .level-node-card.active {
+    @apply border-primary shadow-lg;
+  }
+  
+  .level-node-card.completed {
+    @apply border-success bg-success bg-opacity-5;
+  }
+  
+  .node-circle {
+    @apply w-[50px] h-[50px] rounded-full bg-white border-2 border-gray-300 flex items-center justify-center text-xl text-gray-600 shadow-sm z-10 transition-all duration-300;
+  }
+  
+  .level-node.active .node-circle {
+    @apply border-primary text-primary;
+  }
+  
+  .level-node-card.active .node-circle {
+    @apply border-primary text-primary;
+  }
+  
+  .level-node.completed .node-circle {
+    @apply border-success bg-success text-white;
+  }
+  
+  .level-node-card.completed .node-circle {
+    @apply border-success bg-success text-white;
+  }
+  
+  .level-node.locked {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  
+  .node-label {
+    @apply mt-2 text-center text-sm font-medium;
+  }
+  
+  .quiz-option {
+    @apply p-3 border-2 border-gray-300 rounded-lg mb-2 cursor-pointer transition-all duration-300 hover:border-accent;
+  }
+  
+  .quiz-option.selected {
+    @apply border-primary bg-primary bg-opacity-10;
+  }
+  
+  .quiz-option.correct {
+    @apply border-success bg-success bg-opacity-10;
+  }
+  
+  .quiz-option.incorrect {
+    @apply border-primary bg-primary bg-opacity-10;
+  }
+  
+  .badge {
+    @apply w-32 h-32 rounded-full bg-light border-8 border-primary flex items-center justify-center text-6xl text-primary shadow-lg;
+  }
+
+  /* Estilos personalizados para las tarjetas 3D */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* Estilos para las tarjetas de políticas */
+  .policy-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .policy-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Estilos para el indicador de progreso */
+  .progress-indicator {
+    transition: all 0.3s ease;
+  }
+
+  .progress-indicator.active {
+    transform: scale(1.2);
+  }
+
+  /* Estilos para los botones interactivos */
+  .btn-interactive {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-interactive::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-interactive:hover::before {
+    left: 100%;
+  }
+
+  /* Animación personalizada para estrellas pulsantes */
+  @keyframes star-pulse {
+    0% {
+      opacity: 0.3;
+      transform: scale(0.5);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.5);
+    }
+    100% {
+      opacity: 0.3;
+      transform: scale(0.5);
+    }
+  }
+
+  .animate-star-pulse {
+    animation: star-pulse 3s ease-in-out infinite;
+  }
+}
