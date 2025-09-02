@@ -1,416 +1,221 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useNavigate } from 'react-router-dom'
-import { 
-  faCalculator, 
-  faUsers, 
-  faShield, 
-  faSearch, 
-  faBriefcase,
-  faStar,
-  faTrophy,
-  faArrowRight,
-  faClock,
-  faCheckCircle,
-  faAward,
-  faArrowLeft
-} from '@fortawesome/free-solid-svg-icons'
-import CompanyServicesQuiz from './CompanyServicesQuiz'
+import React, { useState, useMemo } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import CompanyServicesQuiz from './CompanyServicesQuiz';
 
-const CompanyServicesLevel = ({ level, onStartQuiz }) => {
-  const navigate = useNavigate()
-  const [activeService, setActiveService] = useState(0)
-  const [isAutoRotating, setIsAutoRotating] = useState(true)
-  const [showQuiz, setShowQuiz] = useState(false)
+const adnSections = [
+	{
+		title: 'Identidad Corporativa',
+		emoji: '🏢',
+		color: 'bg-blue-700',
+		description: '👉 Aquí se explica el “para qué existimos” y el rumbo que seguimos.',
+		content: [
+			{
+				label: 'Visión (2030) 🌟',
+				text: 'Lograr la consolidación de soluciones de Outsourcing en los mercados actuales, mejorando el desempeño de los clientes, con una cultura innovadora que impulse bienestar y crecimiento de los colaboradores.',
+			},
+			{
+				label: 'Misión 🎯',
+				text: 'Ayudar a los clientes a mejorar su desempeño mediante diseño y acompañamiento en la implementación de soluciones personalizadas de Back Office, con tecnología e innovación. Además, garantizar satisfacción de clientes y bienestar de colaboradores, construyendo relaciones de largo plazo, adaptándonos a los cambios del entorno.',
+			},
+			{
+				label: 'Propósito 💡',
+				text: 'Brindar tranquilidad para todos con soluciones tecnológicamente humanas, trabajando con integridad, confiabilidad, empatía y adaptabilidad para crear experiencias positivas.',
+			},
+		],
+	},
+	{
+		title: 'Valores Fundamentales',
+		emoji: '🧬',
+		color: 'bg-green-700',
+		description: '👉 Son el ADN de la organización, las reglas del juego.',
+		content: [
+			{ label: 'Integridad 🤝', text: 'honestidad, transparencia y ética en todo momento.' },
+			{ label: 'Adaptabilidad 🔄', text: 'agilidad y aprendizaje continuo frente a cambios.' },
+			{ label: 'Empatía 💖', text: 'comprender y respetar las necesidades de clientes y colaboradores.' },
+			{ label: 'Confiabilidad 🛡️', text: 'responsabilidad, compromiso y cumplimiento de acuerdos.' },
+		],
+	},
+	{
+		title: 'Diferenciadores',
+		emoji: '✨',
+		color: 'bg-yellow-600',
+		description: '👉 Lo que hace única a la empresa frente a la competencia.',
+		content: [
+			{ label: 'Acompañamiento 👥', text: 'interacción permanente con clientes para superar expectativas.' },
+			{ label: 'Adaptabilidad 🔄', text: 'respuesta efectiva a cambios e imprevistos.' },
+			{ label: 'Personalización 🛠️', text: 'diseño e implementación de soluciones a la medida.' },
+		],
+	},
+	{
+		title: 'Competencias S&P (por valor)',
+		emoji: '📊',
+		color: 'bg-purple-700',
+		description: '👉 Cómo se aterrizan los valores en comportamientos observables.',
+		content: [
+			{ label: 'Integridad → Actúa con integridad 🤝', text: 'Capacidad para mantenerse dentro de normas éticas y morales; comunicación abierta y honesta incluso en situaciones difíciles.' },
+			{ label: 'Confiabilidad → Demuestra competencia y sinceridad 🛡️', text: 'Responsabilidad en procesos y relaciones, generando confianza.' },
+			{ label: 'Calidad en el trabajo 🏅', text: 'Conocimiento profundo de las áreas a cargo, generando credibilidad en clientes internos y externos.' },
+			{ label: 'Empatía → Orientación al cliente 💖', text: 'Comprender y satisfacer necesidades, resolviendo problemas con actitud positiva y proactiva.' },
+			{ label: 'Adaptabilidad → Adaptación al cambio 🔄', text: 'Ajustarse a contextos dinámicos, modificando conductas frente a dificultades o nueva información.' },
+		],
+	},
+	{
+		title: 'Competencias Transversales',
+		emoji: '🔗',
+		color: 'bg-teal-700',
+		description: '👉 Atributos que se esperan en todos los roles dentro de la empresa.',
+		content: [
+			{ label: 'Actuar con integridad 🤝' },
+			{ label: 'Mantener calidad en el trabajo 🏅' },
+			{ label: 'Practicar la empatía 💖' },
+			{ label: 'Adaptarse al cambio 🔄' },
+		],
+	},
+	{
+		title: 'Competencias según nivel',
+		emoji: '📈',
+		color: 'bg-pink-700',
+		description: '👉 Lo que se espera según el nivel de responsabilidad en la organización.',
+		content: [
+			{ label: 'Estratégico 🧠', text: 'desarrollo de equipos de alto desempeño, pensamiento estratégico.' },
+			{ label: 'Táctico 🗂️', text: 'liderazgo, pensamiento conceptual y analítico.' },
+			{ label: 'Operativo ⚙️', text: 'orientación al logro, capacidad de aprendizaje, trabajo colaborativo.' },
+		],
+	},
+];
 
-  // Datos de los servicios
-  const services = [
-    {
-      id: 1,
-      name: "Outsourcing de Nómina",
-      icon: faCalculator,
-      color: "blue",
-      emoji: "💰",
-      description: "Gestión completa y automatizada de nóminas empresariales con cumplimiento legal garantizado.",
-      problem: "Las empresas pierden tiempo valioso y recursos en procesos manuales de nómina propensos a errores.",
-      solution: "Automatizamos todo el proceso de nómina con tecnología avanzada, garantizando precisión y cumplimiento legal.",
-      benefits: [
-        { icon: faClock, text: "Ahorro de tiempo del 80%" },
-        { icon: faCheckCircle, text: "Precisión del 99.9%" },
-        { icon: faShield, text: "Cumplimiento legal garantizado" },
-        { icon: faArrowRight, text: "Reducción de costos operativos" }
-      ],
-      stats: [
-        { label: "Empresas atendidas", value: "500+" },
-        { label: "Empleados procesados", value: "25,000+" },
-        { label: "Precisión", value: "99.9%" },
-        { label: "Tiempo ahorrado", value: "80%" }
-      ]
-    },
-    {
-      id: 2,
-      name: "Outsourcing de RRHH",
-      icon: faUsers,
-      color: "green",
-      emoji: "👥",
-      description: "Gestión integral de recursos humanos desde reclutamiento hasta desarrollo de talento.",
-      problem: "Los departamentos de RRHH se sobrecargan con tareas administrativas perdiendo foco en el desarrollo estratégico.",
-      solution: "Nos encargamos de todas las funciones de RRHH permitiendo que las empresas se enfoquen en su core business.",
-      benefits: [
-        { icon: faUsers, text: "Gestión integral de talento" },
-        { icon: faArrowRight, text: "Mejora en retención del 40%" },
-        { icon: faAward, text: "Procesos estandarizados" },
-        { icon: faClock, text: "Respuesta en 24 horas" }
-      ],
-      stats: [
-        { label: "Procesos de selección", value: "1,200+" },
-        { label: "Tasa de retención", value: "95%" },
-        { label: "Tiempo de contratación", value: "15 días" },
-        { label: "Satisfacción cliente", value: "98%" }
-      ]
-    },
-    {
-      id: 3,
-      name: "Employer of Record - EOR",
-      icon: faShield,
-      color: "purple",
-      emoji: "🛡️",
-      description: "Solución completa para contratación internacional sin establecer entidades legales locales.",
-      problem: "Expandirse internacionalmente requiere establecer entidades legales costosas y complejas en cada país.",
-      solution: "Actuamos como empleador legal permitiendo contratación global rápida y sin complicaciones legales.",
-      benefits: [
-        { icon: faShield, text: "Protección legal completa" },
-        { icon: faArrowRight, text: "Expansión en 48 horas" },
-        { icon: faCheckCircle, text: "Cumplimiento local garantizado" },
-        { icon: faAward, text: "Soporte multipaís" }
-      ],
-      stats: [
-        { label: "Países disponibles", value: "50+" },
-        { label: "Tiempo de setup", value: "48h" },
-        { label: "Cumplimiento legal", value: "100%" },
-        { label: "Empleados globales", value: "5,000+" }
-      ]
-    },
-    {
-      id: 4,
-      name: "Reclutamiento y Selección",
-      icon: faSearch,
-      color: "orange",
-      emoji: "🔍",
-      description: "Proceso especializado de búsqueda y selección de talento con metodologías avanzadas.",
-      problem: "Encontrar el talento adecuado toma meses y los procesos tradicionales no garantizan la mejor selección.",
-      solution: "Utilizamos metodologías avanzadas y tecnología para identificar y atraer el mejor talento en tiempo récord.",
-      benefits: [
-        { icon: faSearch, text: "Búsqueda especializada" },
-        { icon: faArrowRight, text: "Tiempo reducido 60%" },
-        { icon: faAward, text: "Candidatos pre-validados" },
-        { icon: faCheckCircle, text: "Garantía de reemplazo" }
-      ],
-      stats: [
-        { label: "Posiciones cubiertas", value: "800+" },
-        { label: "Tiempo promedio", value: "21 días" },
-        { label: "Tasa de éxito", value: "92%" },
-        { label: "Candidatos evaluados", value: "15,000+" }
-      ]
-    },
-    {
-      id: 5,
-      name: "Outsourcing de Tesorería",
-      icon: faBriefcase,
-      color: "teal",
-      emoji: "💼",
-      description: "Gestión financiera y de tesorería empresarial con control total y transparencia.",
-      problem: "La gestión de tesorería requiere expertise especializado y sistemas costosos que muchas empresas no poseen.",
-      solution: "Ofrecemos gestión completa de tesorería con tecnología de punta y profesionales especializados.",
-      benefits: [
-        { icon: faBriefcase, text: "Gestión profesional" },
-        { icon: faArrowRight, text: "Optimización de flujos" },
-        { icon: faShield, text: "Control y transparencia" },
-        { icon: faAward, text: "Reportería avanzada" }
-      ],
-      stats: [
-        { label: "Capital gestionado", value: "$50M+" },
-        { label: "Empresas atendidas", value: "150+" },
-        { label: "Ahorro promedio", value: "25%" },
-        { label: "Precisión reportes", value: "100%" }
-      ]
-    }
-  ]
+const glassColors = {
+	'bg-blue-700': 'bg-blue-500/40 backdrop-blur-lg',
+	'bg-green-700': 'bg-green-500/40 backdrop-blur-lg',
+	'bg-yellow-600': 'bg-yellow-400/40 backdrop-blur-lg',
+	'bg-purple-700': 'bg-purple-500/40 backdrop-blur-lg',
+	'bg-teal-700': 'bg-teal-400/40 backdrop-blur-lg',
+	'bg-pink-700': 'bg-pink-400/40 backdrop-blur-lg',
+};
 
-  // Auto-rotación cada 5 segundos
-  useEffect(() => {
-    if (!isAutoRotating) return
+const CompanyServicesLevel = () => {
+	const navigate = useNavigate();
+	const [activeSection, setActiveSection] = useState(0);
+	const [showQuiz, setShowQuiz] = useState(false);
 
-    const interval = setInterval(() => {
-      setActiveService(prev => (prev + 1) % services.length)
-    }, 5000)
+	const stars = useMemo(() => {
+		return [...Array(50)].map((_, i) => ({
+			id: i,
+			left: Math.random() * 100,
+			top: Math.random() * 100,
+			duration: 2 + Math.random() * 3,
+			delay: Math.random() * 2,
+		}));
+	}, []);
 
-    return () => clearInterval(interval)
-  }, [isAutoRotating, services.length])
+	const handleBackToServices = () => setShowQuiz(false);
+	const handleQuizComplete = () => {};
 
-  const handleServiceClick = (index) => {
-    setActiveService(index)
-    setIsAutoRotating(false)
-    // Reactivar auto-rotación después de 10 segundos
-    setTimeout(() => setIsAutoRotating(true), 10000)
-  }
+	if (showQuiz) {
+		return <CompanyServicesQuiz onBack={handleBackToServices} onComplete={handleQuizComplete} />;
+	}
 
-  const handleStartQuiz = () => {
-    setShowQuiz(true)
-  }
+	const section = adnSections[activeSection];
+	const glassClass = glassColors[section.color] || 'bg-white/20 backdrop-blur-lg';
 
-  const handleBackToServices = () => {
-    setShowQuiz(false)
-  }
+	return (
+		<div className="min-h-screen relative overflow-hidden">
+			{/* Fondo fijo y estrellas */}
+			<div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+				{stars.map((star) => (
+					<div
+						key={star.id}
+						className="absolute bg-white rounded-full animate-star-pulse"
+						style={{
+							left: `${star.left}%`,
+							top: `${star.top}%`,
+							width: '2px',
+							height: '2px',
+							animationDuration: `${star.duration}s`,
+							animationDelay: `${star.delay}s`,
+						}}
+					/>
+				))}
+			</div>
+			<div className="relative z-10 container mx-auto px-6 py-12">
+				{/* Header */}
+				<div className="text-center mb-12">
+					<div className="flex items-center justify-between mb-6">
+						<button
+							onClick={() => navigate('/map')}
+							className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors"
+						>
+							<FontAwesomeIcon icon={faArrowLeft} />
+							<span>Volver al mapa</span>
+						</button>
+						<div></div> {/* Spacer para centrar el título */}
+					</div>
+					<h1 className="text-4xl md:text-5xl font-bold text-white mb-4">El ADN de la Empresa</h1>
+					<p className="text-xl text-gray-300 max-w-3xl mx-auto">
+						Transformamos la gestión empresarial con soluciones innovadoras que impulsan el crecimiento y la
+						eficiencia de tu organización
+					</p>
+				</div>
+				{/* Layout principal */}
+				<div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+					{/* Sidebar conceptual ADN */}
+					<div className="lg:col-span-1 space-y-4">
+						{adnSections.map((item, idx) => (
+							<button
+								key={idx}
+								className={`w-full p-4 rounded-xl text-left font-semibold text-lg flex items-center gap-2 transition-colors ${
+									activeSection === idx
+										? item.color + ' text-white shadow-lg'
+										: 'bg-white/10 text-white hover:' + item.color
+								}`}
+								onClick={() => setActiveSection(idx)}
+							>
+								<span>{item.emoji}</span>
+								<span>{item.title}</span>
+							</button>
+						))}
+					</div>
+					{/* Conceptual div principal con animación y glassmorphism */}
+					<div className="lg:col-span-3 flex flex-col items-center justify-start">
+						<AnimatePresence mode="wait">
+							<motion.div
+								key={activeSection}
+								initial={{ opacity: 0, x: -80 }}
+								animate={{ opacity: 1, x: 0 }}
+								exit={{ opacity: 0, x: 80 }}
+								transition={{ duration: 0.5, type: 'spring' }}
+								className={`w-full max-w-3xl rounded-2xl p-10 shadow-2xl ${glassClass} min-h-[420px] flex flex-col border border-white/20`}
+								style={{ minWidth: '420px' }}
+							>
+								<div className="flex items-center gap-3 mb-4">
+									<span className="text-3xl">{section.emoji}</span>
+									<span className="font-bold text-2xl text-white">{section.title}</span>
+								</div>
+								<div className="mb-6 text-white text-lg">{section.description}</div>
+								<div className="space-y-4">
+									{section.content.map((c, i) => (
+										<div key={i} className="bg-white/10 p-4 rounded-xl text-white">
+											<span className="font-semibold text-xl block mb-1">{c.label}</span>
+											{c.text && <span className="text-base text-gray-200">{c.text}</span>}
+										</div>
+									))}
+								</div>
+							</motion.div>
+						</AnimatePresence>
+						<button
+							onClick={() => setShowQuiz(true)}
+							className="mt-8 px-6 py-3 bg-purple-700 text-white font-bold rounded-xl shadow-lg hover:bg-purple-800 transition-colors text-lg self-center"
+						>
+							Iniciar trivia
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
 
-  const handleQuizComplete = () => {
-    // Ya no necesitamos hacer nada aquí, el quiz maneja su propia navegación
-    // El quiz completará el nivel y navegará al Achievement automáticamente
-  }
-
-  const getColorClasses = (color, variant = 'bg') => {
-    const colors = {
-      blue: {
-        bg: 'bg-blue-500',
-        hover: 'hover:bg-blue-600',
-        text: 'text-blue-600',
-        border: 'border-blue-500',
-        gradient: 'from-blue-500 to-blue-600'
-      },
-      green: {
-        bg: 'bg-green-500',
-        hover: 'hover:bg-green-600',
-        text: 'text-green-600',
-        border: 'border-green-500',
-        gradient: 'from-green-500 to-green-600'
-      },
-      purple: {
-        bg: 'bg-purple-500',
-        hover: 'hover:bg-purple-600',
-        text: 'text-purple-600',
-        border: 'border-purple-500',
-        gradient: 'from-purple-500 to-purple-600'
-      },
-      orange: {
-        bg: 'bg-orange-500',
-        hover: 'hover:bg-orange-600',
-        text: 'text-orange-600',
-        border: 'border-orange-500',
-        gradient: 'from-orange-500 to-orange-600'
-      },
-      teal: {
-        bg: 'bg-teal-500',
-        hover: 'hover:bg-teal-600',
-        text: 'text-teal-600',
-        border: 'border-teal-500',
-        gradient: 'from-teal-500 to-teal-600'
-      }
-    }
-    return colors[color] || colors.blue
-  }
-
-  const currentService = services[activeService]
-
-  // Memoizar las posiciones y propiedades de animación de las estrellas
-  const stars = useMemo(() => {
-    return [...Array(50)].map((_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: 2 + Math.random() * 3,
-      delay: Math.random() * 2
-    }))
-  }, [])
-
-  if (showQuiz) {
-    return (
-      <CompanyServicesQuiz 
-        onBack={handleBackToServices}
-        onComplete={handleQuizComplete}
-      />
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Estrellas con efecto de pulsación */}
-      <div className="absolute inset-0 pointer-events-none">
-        {stars.map((star) => (
-          <div
-            key={star.id}
-            className="absolute bg-white rounded-full animate-star-pulse"
-            style={{
-              left: `${star.left}%`,
-              top: `${star.top}%`,
-              width: '2px',
-              height: '2px',
-              animationDuration: `${star.duration}s`,
-              animationDelay: `${star.delay}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 container mx-auto px-6 py-12">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <motion.button
-              onClick={() => navigate('/map')}
-              className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FontAwesomeIcon icon={faArrowLeft} />
-              <span>Volver al mapa</span>
-            </motion.button>
-            <div></div> {/* Spacer para centrar el título */}
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Nuestros Servicios Empresariales
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Transformamos la gestión empresarial con soluciones innovadoras que impulsan el crecimiento y la eficiencia de tu organización
-          </p>
-        </motion.div>
-
-        {/* Layout principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {/* Sidebar con cards de servicios */}
-          <div className="lg:col-span-1 space-y-4">
-            {services.map((service, index) => {
-            const colorClasses = getColorClasses(service.color)
-            const isActive = index === activeService
-
-            return (
-              <motion.div
-                key={service.id}
-                className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
-                  isActive 
-                    ? `${colorClasses.bg} shadow-2xl scale-105` 
-                    : 'bg-white/10 backdrop-blur-sm hover:bg-white/20'
-                }`}
-                onClick={() => handleServiceClick(index)}
-                whileHover={{ scale: isActive ? 1.05 : 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : colorClasses.bg}`}>
-                    <FontAwesomeIcon 
-                      icon={service.icon} 
-                      className={`w-6 h-6 ${isActive ? 'text-white' : 'text-white'}`} 
-                    />
-                  </div>
-                  <div>
-                    <h3 className={`font-semibold ${isActive ? 'text-white' : 'text-gray-200'}`}>
-                      {service.name}
-                    </h3>
-                  </div>
-                </div>
-              </motion.div>
-            )
-          })}
-          </div>
-
-          {/* Panel detallado principal */}
-          <div className="lg:col-span-3">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeService}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20"
-              >
-                {/* Header del servicio */}
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="text-6xl">{currentService.emoji}</div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">
-                      {currentService.name}
-                    </h2>
-                    <p className="text-gray-300 text-lg">
-                      {currentService.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Problema/Solución */}
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 mb-8">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-red-400 font-semibold mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
-                        Problema
-                      </h3>
-                      <p className="text-gray-300">{currentService.problem}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-green-400 font-semibold mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                        Solución
-                      </h3>
-                      <p className="text-gray-300">{currentService.solution}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Beneficios clave */}
-                <div className="mb-8">
-                  <h3 className="text-white font-semibold mb-4 flex items-center">
-                    <FontAwesomeIcon icon={faStar} className="w-5 h-5 text-yellow-400 mr-2" />
-                    Beneficios Clave
-                  </h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {currentService.benefits.map((benefit, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-3 bg-white/10 rounded-lg">
-                        <FontAwesomeIcon icon={benefit.icon} className="w-5 h-5 text-yellow-400" />
-                        <span className="text-gray-200">{benefit.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Estadísticas */}
-                <div className="mb-8">
-                  <h3 className="text-white font-semibold mb-4">Estadísticas</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {currentService.stats.map((stat, index) => (
-                      <div key={index} className="text-center p-4 bg-white/10 rounded-lg">
-                        <div className="text-2xl font-bold text-white mb-1">
-                          {stat.value}
-                        </div>
-                        <div className="text-sm text-gray-300">
-                          {stat.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* CTA */}
-                <motion.button
-                  onClick={handleStartQuiz}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-4 px-8 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 flex items-center justify-center space-x-2"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <FontAwesomeIcon icon={faTrophy} className="w-6 h-6" />
-                  <span>Iniciar Simulador de Conocimientos</span>
-                </motion.button>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default CompanyServicesLevel
+export default CompanyServicesLevel;

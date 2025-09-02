@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react';
+import CommitteeLevel from '../components/CommitteeLevel';
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -99,6 +100,9 @@ const LevelContent = () => {
   }
   
   if (!level) return null
+  if (levelIdNum === 5) {
+    return <CommitteeLevel />
+  }
   
   // Estado para controlar la animación del contenido
   const [activeSection, setActiveSection] = useState(0);

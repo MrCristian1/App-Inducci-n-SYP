@@ -1,0 +1,292 @@
+
+
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserTie, faClipboardCheck, faSearch, faLightbulb, faShieldAlt, faUsers, faComments, faHandshake, faStar, faMedal } from '@fortawesome/free-solid-svg-icons';
+
+const committees = [
+  {
+    name: 'COPASST',
+    period: '2024 – 2026',
+    description: 'Comité Paritario de Seguridad y Salud en el Trabajo',
+    members: {
+      workers: [
+        { name: 'Tatiana Chavarro' },
+        { name: 'Dayan Manjarres' },
+        { name: 'Germán Hincapié' },
+      ],
+      employer: [
+        { name: 'Luisa Díaz' },
+        { name: 'Jennifer Cervantes' },
+        { name: 'Ricardo Arámbulo' },
+        { name: 'Eduard Forero' },
+      ],
+    },
+    functions: [
+      { icon: faClipboardCheck, text: 'Hacer seguimiento al plan de trabajo anual.' },
+      { icon: faSearch, text: 'Realizar la investigación y análisis de las causas de los accidentes de trabajo y enfermedades laborales.' },
+      { icon: faLightbulb, text: 'Proponer y participar en actividades de capacitación en seguridad y salud en el trabajo.' },
+      { icon: faShieldAlt, text: 'Proponer a la Dirección General la adopción de medidas y actividades para procurar, mantener y promover ambientes de trabajo seguros y saludables.' },
+      { icon: faUsers, text: 'Realizar inspecciones periódicas en los lugares de trabajo.' },
+    ],
+  },
+  {
+    name: 'CCL',
+    period: '2024 – 2026',
+    description: 'Comité de Convivencia Laboral',
+    members: {
+      workers: [
+        { name: 'Giovanna Gio' },
+        { name: 'Yuly Peña' },
+        { name: 'Fabián Morales' },
+        { name: 'Rocío Guacamene' },
+      ],
+      employer: [
+        { name: 'Luisa Díaz' },
+        { name: 'Ricardo Arámbulo' },
+        { name: 'Alfonso Fonseca' },
+      ],
+    },
+    functions: [
+      { icon: faComments, text: 'Escuchar a las partes involucradas de manera individual sobre los hechos que dieron lugar a la queja.' },
+      { icon: faHandshake, text: 'Adelantar reuniones para crear espacios de diálogo entre las partes, promoviendo compromisos mutuos y soluciones efectivas a las controversias.' },
+      { icon: faSearch, text: 'Examinar de manera confidencial los casos en los que se formulen quejas o reclamos que pudieran tipificar conductas o circunstancias de acoso laboral dentro de la empresa.' },
+      { icon: faClipboardCheck, text: 'Recibir y dar trámite a las quejas sobre situaciones que puedan constituir acoso laboral, así como a las pruebas que las soporten.' },
+      { icon: faLightbulb, text: 'Formular un plan de mejora concertado entre las partes, con el fin de construir, renovar y promover la convivencia laboral, garantizando siempre el principio de confidencialidad.' },
+    ],
+  },
+];
+
+const quizQuestions = [
+  {
+    question: '¿Cuál es la función principal del COPASST?',
+    options: [
+      'Promover ambientes de trabajo seguros y saludables',
+      'Gestionar nómina',
+      'Resolver conflictos laborales',
+      'Realizar auditorías financieras'
+    ],
+    answer: 0,
+    explanation: 'El COPASST se enfoca en la seguridad y salud en el trabajo.'
+  },
+  {
+    question: '¿Qué hace el CCL ante una queja de acoso laboral?',
+    options: [
+      'Ignora la queja',
+      'Recibe y da trámite a la queja, garantizando confidencialidad',
+      'Desvía la queja a otro comité',
+      'Publica la queja en la empresa'
+    ],
+    answer: 1,
+    explanation: 'El CCL recibe, examina y da trámite a las quejas de acoso laboral.'
+  },
+  {
+    question: '¿Quiénes conforman los comités?',
+    options: [
+      'Solo representantes del empleador',
+      'Solo representantes de los trabajadores',
+      'Representantes de ambos grupos',
+      'Solo el gerente general'
+    ],
+    answer: 2,
+    explanation: 'Ambos comités tienen representantes de trabajadores y empleador.'
+  },
+];
+
+function CommitteeLevel() {
+  const [section, setSection] = useState('members');
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [streak, setStreak] = useState(0);
+
+  const sectionTabs = [
+    { key: 'members', label: 'Miembros', icon: faUsers },
+    { key: 'functions', label: 'Funciones', icon: faClipboardCheck },
+    { key: 'quiz', label: 'Quiz', icon: faStar },
+    { key: 'result', label: 'Resultados', icon: faMedal },
+  ];
+
+  const handleTab = (key) => {
+    setSection(key);
+    if (key === 'quiz') {
+      setQuizIndex(0);
+      setSelected(null);
+      setShowResult(false);
+      setScore(0);
+      setStreak(0);
+    }
+  };
+  const handleSelect = (idx) => setSelected(idx);
+  const handleSubmit = () => {
+    if (selected === quizQuestions[quizIndex].answer) {
+      setScore(score + 100 + streak * 20);
+      setStreak(streak + 1);
+    } else {
+      setStreak(0);
+    }
+    if (quizIndex < quizQuestions.length - 1) {
+      setQuizIndex(quizIndex + 1);
+      setSelected(null);
+    } else {
+      setShowResult(true);
+      setSection('result');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-yellow-900 to-slate-900 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-2xl" />
+      </div>
+      <div className="relative z-10 max-w-4xl mx-auto py-10 px-4">
+        {/* Tabs */}
+        <div className="flex justify-center gap-6 mb-8">
+          {sectionTabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => handleTab(tab.key)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold shadow-lg transition-all duration-300 backdrop-blur-md border border-white/20 text-lg ${section === tab.key ? 'bg-yellow-400/30 text-yellow-300 ring-2 ring-yellow-400' : 'bg-white/10 text-white/80 hover:bg-white/20'}`}
+            >
+              <FontAwesomeIcon icon={tab.icon} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Sección de Miembros */}
+        {section === 'members' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {committees.map(com => (
+              <div key={com.name} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl">
+                <h2 className="text-2xl font-bold text-yellow-300 mb-2">{com.name} <span className="text-white/60 text-base">{com.period}</span></h2>
+                <p className="text-white/80 mb-4">{com.description}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-cyan-300 mb-2">Trabajadores</h3>
+                    {com.members.workers.map((m) => (
+                      <div key={m.name} className="flex flex-col items-center gap-2 mb-4">
+                        <div className="w-20 h-20 rounded-full bg-cyan-500/30 flex items-center justify-center text-white font-bold text-3xl shadow-md">
+                          <FontAwesomeIcon icon={faUserTie} />
+                        </div>
+                        <span className="text-white/90 text-base text-center">{m.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-emerald-300 mb-2">Empleador</h3>
+                    {com.members.employer.map((m) => (
+                      <div key={m.name} className="flex flex-col items-center gap-2 mb-4">
+                        <div className="w-20 h-20 rounded-full bg-emerald-500/30 flex items-center justify-center text-white font-bold text-3xl shadow-md">
+                          <FontAwesomeIcon icon={faUserTie} />
+                        </div>
+                        <span className="text-white/90 text-base text-center">{m.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Sección de Funciones */}
+        {section === 'functions' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {committees.map(com => (
+              <div key={com.name} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl">
+                <h2 className="text-2xl font-bold text-yellow-300 mb-2">{com.name}</h2>
+                <p className="text-white/80 mb-4">{com.description}</p>
+                <div className="flex flex-col gap-4">
+                  {com.functions.map((f, i) => (
+                    <div key={i} className="flex items-center gap-4 bg-white/5 rounded-xl p-4 shadow">
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center text-yellow-300 text-3xl bg-yellow-400/30">
+                        <FontAwesomeIcon icon={f.icon} />
+                      </div>
+                      <span className="text-white/90 text-base">{f.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Sección de Quiz */}
+        {section === 'quiz' && !showResult && (
+          <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl flex flex-col items-center">
+            <h2 className="text-2xl font-bold text-yellow-300 mb-6">Quiz</h2>
+            <div className="w-full mb-4">
+              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-yellow-400 rounded-full"
+                  style={{ width: `${((quizIndex + 1) / quizQuestions.length) * 100}%` }}
+                />
+              </div>
+            </div>
+            <div className="mb-6">
+              <span className="text-white/80">Puntaje: </span>
+              <span className="text-yellow-300 font-bold">{score}</span>
+              {streak > 1 && (
+                <span className="ml-4 text-yellow-400">🔥 Racha: {streak}</span>
+              )}
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-4">{quizQuestions[quizIndex].question}</h3>
+            <div className="flex flex-col gap-4 w-full">
+              {quizQuestions[quizIndex].options.map((opt, idx) => (
+                <button
+                  key={idx}
+                  className={`px-6 py-3 rounded-xl font-bold shadow-md transition-all duration-200 text-lg ${selected === idx ? (idx === quizQuestions[quizIndex].answer ? 'bg-green-400 text-white' : 'bg-red-400 text-white') : 'bg-white/10 text-white/80 hover:bg-yellow-400/30 hover:text-yellow-300'}`}
+                  onClick={() => handleSelect(idx)}
+                  disabled={selected !== null}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            {selected !== null && (
+              <div className="mt-6 text-center">
+                <div className={`text-lg font-semibold ${selected === quizQuestions[quizIndex].answer ? 'text-green-400' : 'text-red-400'}`}>
+                  {selected === quizQuestions[quizIndex].answer ? '¡Correcto!' : 'Incorrecto'}
+                </div>
+                <div className="text-white/80 mt-2">{quizQuestions[quizIndex].explanation}</div>
+                <button
+                  className="mt-4 px-6 py-2 rounded-xl bg-yellow-400 text-white font-bold shadow-md"
+                  onClick={handleSubmit}
+                >
+                  {quizIndex < quizQuestions.length - 1 ? 'Siguiente' : 'Ver Resultados'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Sección de Resultados */}
+        {section === 'result' && (
+          <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl flex flex-col items-center">
+            <h2 className="text-2xl font-bold text-yellow-300 mb-6">Resultados</h2>
+            <div className="mb-4 text-white/80 text-lg">Puntaje final: <span className="text-yellow-300 font-bold">{score}</span></div>
+            <div className="mb-6">
+              {score === quizQuestions.length * 120 ? (
+                <span className="text-green-400 font-bold text-xl flex items-center gap-2"><FontAwesomeIcon icon={faMedal} /> ¡Medalla de oro!</span>
+              ) : score >= quizQuestions.length * 100 ? (
+                <span className="text-yellow-400 font-bold text-xl flex items-center gap-2"><FontAwesomeIcon icon={faMedal} /> ¡Medalla de plata!</span>
+              ) : (
+                <span className="text-gray-300 font-bold text-xl flex items-center gap-2"><FontAwesomeIcon icon={faMedal} /> ¡Sigue practicando!</span>
+              )}
+            </div>
+            <button
+              className="px-6 py-2 rounded-xl bg-yellow-400 text-white font-bold shadow-md"
+              onClick={() => handleTab('members')}
+            >
+              Volver a los miembros
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+
+  );
+}
+

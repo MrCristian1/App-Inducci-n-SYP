@@ -123,15 +123,18 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
 
   const handleDefinitionClick = (definitionId) => {
   if (matchedPairs.has(definitionId)) return
+  // Bloquear si hay feedback mostrándose
+  if (showFeedback) return
   // Si ya hay una definición seleccionada, no permitir seleccionar otra
   if (selectedDefinition !== null) return
-  // Si ya hay una política seleccionada, permitir seleccionar definición
   setSelectedDefinition(definitionId)
   setFlippedCards(prev => new Set(Array.from(prev).concat(`def-${definitionId}`)))
   }
 
   const handlePolicyClick = (policyId) => {
     if (matchedPairs.has(policyId)) return
+    // Bloquear si hay feedback mostrándose
+    if (showFeedback) return
     // Si ya hay una política seleccionada, no permitir seleccionar otra
     if (selectedPolicy !== null) return
     setSelectedPolicy(policyId)
@@ -190,26 +193,11 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
     const isSelected = type === 'def' ? selectedDefinition === item.id : selectedPolicy === item.id
     
     return (
-      <motion.div
-        key={cardId}
-        className="relative h-48 cursor-pointer"
-        onClick={() => !isMatched && onClick(item.id)}
-        whileHover={!isMatched ? { scale: 1.05, y: -5 } : {}}
-        whileTap={!isMatched ? { scale: 0.95 } : {}}
-      >
-        <motion.div
-          className={`relative w-full h-full transform-style-preserve-3d transition-transform duration-700 ${isFlipped ? 'rotate-y-180' : ''}`}
-          style={{ transformStyle: 'preserve-3d' }}
-        >
+      <div key={cardId} className="relative h-48 cursor-pointer" onClick={() => !isMatched && onClick(item.id)}>
+        <div className={`relative w-full h-full transform-style-preserve-3d transition-transform duration-700 ${isFlipped ? 'rotate-y-180' : ''}`} style={{ transformStyle: 'preserve-3d' }}>
           {/* Parte trasera (oculta) */}
           <div className="absolute inset-0 w-full h-full backface-hidden rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 border-2 border-white/20 flex items-center justify-center">
-            <motion.div
-              className="text-white text-6xl opacity-50"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              ?
-            </motion.div>
+            <span className="text-white text-6xl opacity-50">?</span>
           </div>
           {/* Parte frontal (visible cuando se voltea) */}
           <div 
@@ -220,22 +208,17 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
             } flex flex-col justify-center items-center text-center`}
           >
             {isMatched && (
-              <motion.div
-                className="absolute top-2 right-2 text-green-400 text-2xl"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", duration: 0.6 }}
-              >
+              <span className="absolute top-2 right-2 text-green-400 text-2xl">
                 <FontAwesomeIcon icon={faCheck} />
-              </motion.div>
+              </span>
             )}
             <FontAwesomeIcon icon={item.icon} className="text-3xl mb-3 opacity-90" />
             <p className="font-bold text-sm leading-tight">
               {type === 'def' ? item.definition : item.policyName}
             </p>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     )
   }
 
@@ -295,19 +278,10 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
       {/* Estrellas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
         {stars.map((star) => (
-          <motion.div
+          <div
             key={star.id}
             className="absolute w-1 h-1 bg-white rounded-full opacity-60"
             style={{ left: `${star.left}%`, top: `${star.top}%` }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: star.duration,
-              repeat: Infinity,
-              delay: star.delay,
-            }}
           />
         ))}
       </div>
@@ -369,22 +343,10 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Columna de definiciones */}
           <div>
-            <motion.h3
-              className="text-2xl font-bold text-white mb-6 text-center"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              Definiciones
-            </motion.h3>
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">Definiciones</h3>
             <div className="space-y-4">
               {shuffledDefinitions.map((item, index) => (
-                <motion.div
-                  key={`def-${item.id}`}
-                  initial={{ opacity: 0, x: -100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                >
+                <div key={`def-${item.id}`}>
                   {renderCard(
                     item,
                     'def',
@@ -392,29 +354,17 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
                     matchedPairs.has(item.id),
                     handleDefinitionClick
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
 
           {/* Columna de nombres de políticas */}
           <div>
-            <motion.h3
-              className="text-2xl font-bold text-white mb-6 text-center"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              Nombres de Políticas
-            </motion.h3>
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">Nombres de Políticas</h3>
             <div className="space-y-4">
               {shuffledPolicies.map((item, index) => (
-                <motion.div
-                  key={`pol-${item.id}`}
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                >
+                <div key={`pol-${item.id}`}>
                   {renderCard(
                     item,
                     'pol',
@@ -422,28 +372,22 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
                     matchedPairs.has(item.id),
                     handlePolicyClick
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
         </div>
 
         {/* Botón de regreso */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-        >
-          <div className="text-center mt-12">
-            <button
-              className="bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-xl font-bold border border-white/20 hover:bg-white/20"
-              onClick={onBackToPolicies}
-            >
-              <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-              Volver a Políticas
-            </button>
-          </div>
-        </motion.div>
+        <div className="text-center mt-12">
+          <button
+            className="bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-xl font-bold border border-white/20 hover:bg-white/20"
+            onClick={onBackToPolicies}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+            Volver a Políticas
+          </button>
+        </div>
       </div>
     </div>
   )

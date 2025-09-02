@@ -884,7 +884,9 @@ const Map = () => {
                 <h2 className="text-3xl font-bold text-white mb-4">{selectedLevel.title}</h2>
                 
                 <p className="text-white/80 mb-6 leading-relaxed">
-                  {selectedLevel.content?.[1]?.text || "Prepárate para una nueva aventura de aprendizaje."}
+                  {selectedLevel.id === 2
+                    ? "Descubre el ADN de Solutions and Payroll: nuestra esencia, valores y el motor que impulsa todo lo que hacemos."
+                    : selectedLevel.content?.[1]?.text || "Prepárate para una nueva aventura de aprendizaje."}
                 </p>
                 
                 <div className="flex items-center justify-center mb-6 space-x-4">

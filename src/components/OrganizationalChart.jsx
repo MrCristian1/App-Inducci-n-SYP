@@ -35,7 +35,7 @@ const OrganizationalChart = () => {
       name: 'Director General',
       description: 'Responsable de la gestión administrativa y estratégica.',
       reportsTo: 'ceo',
-      supervises: ['lider-gestion-humana', 'analista-administrativo-financiero', 'asistente-comercial', 'asistente-comunicacion-marketing'],
+      supervises: ['lider-gestion-humana', 'analista-administrativo-financiero', 'asistente-administrativo-financiero', 'asistente-comercial', 'asistente-comunicacion-marketing', 'outsourcing-marketing'],
       level: 2,
       color: 'from-blue-500 to-blue-700'
     },
@@ -75,7 +75,7 @@ const OrganizationalChart = () => {
       name: 'Analista Administrativo y Financiero',
       description: 'Gestión administrativa y financiera.',
       reportsTo: 'director-general',
-      supervises: ['asistente-administrativo-financiero'],
+      supervises: [],
       level: 6,
       color: 'from-green-500 to-green-700'
     },
@@ -115,7 +115,7 @@ const OrganizationalChart = () => {
       name: 'Asistente de Comunicación y Marketing',
       description: 'Apoyo en comunicación y marketing.',
       reportsTo: 'director-general',
-      supervises: ['outsourcing-marketing'],
+      supervises: [],
       level: 7,
       color: 'from-red-500 to-red-700'
     },
@@ -124,7 +124,7 @@ const OrganizationalChart = () => {
       title: 'Outsourcing de Marketing',
       name: 'Outsourcing de Marketing',
       description: 'Servicios de marketing externos.',
-      reportsTo: 'asistente-comunicacion-marketing',
+      reportsTo: 'director-general',
       supervises: [],
       level: 8,
       color: 'from-red-500 to-red-700'
@@ -150,7 +150,7 @@ const OrganizationalChart = () => {
       name: 'Jefe de Nómina',
       description: 'Encargado de la gestión de nómina.',
       reportsTo: 'director-operaciones',
-      supervises: ['profesional-nomina'],
+      supervises: ['profesional-nomina', 'analista-nomina', 'asistente-nomina', 'auxiliar-nomina'],
       level: 3,
       color: 'from-blue-500 to-blue-700'
     },
@@ -160,7 +160,7 @@ const OrganizationalChart = () => {
       name: 'Profesional de Nómina',
       description: 'Responsable de procesos de nómina.',
       reportsTo: 'jefe-nomina',
-      supervises: ['analista-nomina'],
+      supervises: [],
       level: 5,
       color: 'from-green-500 to-green-700'
     },
@@ -169,8 +169,8 @@ const OrganizationalChart = () => {
       title: 'Analista de Nómina',
       name: 'Analista de Nómina',
       description: 'Analiza y procesa nómina.',
-      reportsTo: 'profesional-nomina',
-      supervises: ['asistente-nomina'],
+      reportsTo: 'jefe-nomina',
+      supervises: [],
       level: 6,
       color: 'from-teal-400 to-teal-600'
     },
@@ -179,8 +179,8 @@ const OrganizationalChart = () => {
       title: 'Asistente de Nómina',
       name: 'Asistente de Nómina',
       description: 'Apoya en tareas de nómina.',
-      reportsTo: 'analista-nomina',
-      supervises: ['auxiliar-nomina'],
+      reportsTo: 'jefe-nomina',
+      supervises: [],
       level: 7,
       color: 'from-orange-500 to-orange-700'
     },
@@ -189,7 +189,7 @@ const OrganizationalChart = () => {
       title: 'Auxiliar de Nómina',
       name: 'Auxiliar de Nómina',
       description: 'Auxiliar en procesos de nómina.',
-      reportsTo: 'asistente-nomina',
+      reportsTo: 'jefe-nomina',
       supervises: [],
       level: 8,
       color: 'from-orange-500 to-orange-700'
@@ -223,7 +223,8 @@ const OrganizationalChart = () => {
       supervises: [
         'analista-administracion-personal',
         'asistente-administracion-personal',
-        'outsourcing-legal'
+        'outsourcing-legal',
+        'outsourcing-soporte-it'
       ],
       level: 4,
       color: 'from-green-500 to-green-700'
@@ -234,7 +235,7 @@ const OrganizationalChart = () => {
       name: 'Analista de Administración de Personal',
       description: 'Analiza procesos de administración de personal.',
       reportsTo: 'lider-administracion-personal',
-      supervises: ['asistente-administracion-personal'],
+      supervises: [],
       level: 6,
       color: 'from-teal-400 to-teal-600'
     },
@@ -243,7 +244,7 @@ const OrganizationalChart = () => {
       title: 'Asistente de Administración de Personal',
       name: 'Asistente de Administración de Personal',
       description: 'Apoya en administración de personal.',
-      reportsTo: 'analista-administracion-personal',
+      reportsTo: 'lider-administracion-personal',
       supervises: [],
       level: 7,
       color: 'from-orange-500 to-orange-700'
@@ -254,7 +255,7 @@ const OrganizationalChart = () => {
       name: 'Outsourcing Legal',
       description: 'Servicios legales externos.',
       reportsTo: 'lider-administracion-personal',
-      supervises: ['outsourcing-soporte-it'],
+      supervises: [],
       level: 8,
       color: 'from-red-500 to-red-700'
     },
@@ -263,7 +264,7 @@ const OrganizationalChart = () => {
       title: 'Outsourcing Soporte IT',
       name: 'Outsourcing Soporte IT',
       description: 'Servicios de soporte IT externos.',
-      reportsTo: 'outsourcing-legal',
+      reportsTo: 'lider-administracion-personal',
       supervises: [],
       level: 9,
       color: 'from-red-500 to-red-700'

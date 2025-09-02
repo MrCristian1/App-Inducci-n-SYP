@@ -209,12 +209,12 @@ export const levelsData = [
   },
   {
     id: 2,
-    title: "Funciones de la empresa",
+  title: "ADN de la empresa",
     icon: "tasks",
     content: [
       {
-        type: "heading",
-        text: "Funciones de Solutions and Payroll"
+  type: "heading",
+  text: "ADN de Solutions and Payroll"
       },
       {
         type: "paragraph",
