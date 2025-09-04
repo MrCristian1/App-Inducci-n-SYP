@@ -28,6 +28,7 @@ import PoliciesLevel from '../components/PoliciesLevel'
 import CompanyServicesLevel from '../components/CompanyServicesLevel'
 import ValuesGameLevel from '../components/ValuesGameLevel'
 import HierarchyLevel from '../components/HierarchyLevel'
+import AccidentLevel from '../components/AccidentLevel'
 
 const LevelContent = () => {
   const { levelId } = useParams()
@@ -50,11 +51,10 @@ const LevelContent = () => {
   
   useEffect(() => {
     // Verificar si el nivel existe y está desbloqueado
-    if (!level || !isLevelUnlocked(levelIdNum)) {
-      navigate('/map')
-      return
-    }
-    
+    // if (!level || !isLevelUnlocked(levelIdNum)) {
+    //   navigate('/map')
+    //   return
+    // }
     // Resetear las respuestas del quiz al cargar un nuevo nivel
     resetQuizAnswers()
     setShowQuiz(false)
@@ -100,9 +100,9 @@ const LevelContent = () => {
   }
   
   if (!level) return null
-  if (levelIdNum === 5) {
-    return <CommitteeLevel />
-  }
+  // if (levelIdNum === 5) {
+  //   return <CommitteeLevel />;
+  // }
   
   // Estado para controlar la animación del contenido
   const [activeSection, setActiveSection] = useState(0);
@@ -233,6 +233,10 @@ const LevelContent = () => {
   if (level && level.policies) {
     return <PoliciesLevel level={level} onStartQuiz={() => setShowQuiz(true)} />
   }
+  // Si es el nivel de accidentalidad (nivel 6), usar el componente especializado
+  if (level && level.id === 6) {
+    return <AccidentLevel />
+  }
 
   // Si es el nivel de funciones de la empresa (nivel 2), usar el componente especializado
   if (level && level.id === 2) {
@@ -247,6 +251,11 @@ const LevelContent = () => {
   // Si es el nivel de jerarquía y estructura organizacional (nivel 4), usar el componente especializado
   if (level && level.id === 4) {
     return <HierarchyLevel onComplete={() => navigate(`/achievement/${levelIdNum}`)} />
+  }
+
+  // Si es el nivel de comités (nivel 5), usar el componente especializado
+  if (level && level.id === 5) {
+    return <CommitteeLevel onComplete={() => navigate(`/achievement/${levelIdNum}`)} />
   }
 
   const handleNextQuestion = () => {

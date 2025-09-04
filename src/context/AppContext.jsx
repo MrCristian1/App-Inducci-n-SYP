@@ -51,11 +51,11 @@ export const AppProvider = ({ children }) => {
   // Verificar si un nivel está desbloqueado
   const isLevelUnlocked = useCallback((levelId) => {
     // El primer nivel siempre está desbloqueado
-    if (levelId === 1) return true
-    
+    // if (levelId === 1) return true
     // Los demás niveles se desbloquean en orden
-    const isUnlocked = completedLevels.includes(levelId - 1) || completedLevels.includes(levelId)
-    return isUnlocked
+    // const isUnlocked = completedLevels.includes(levelId - 1) || completedLevels.includes(levelId)
+    // return isUnlocked
+    return true // Todos los niveles desbloqueados para pruebas
   }, [completedLevels])
   
   // Seleccionar una respuesta de quiz

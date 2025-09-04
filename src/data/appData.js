@@ -6,7 +6,7 @@
 // Configuración general de la empresa
 export const companyConfig = {
   companyName: "Solutions and Payroll",
-  totalLevels: 5,
+  totalLevels: 6,
   requiredCorrectAnswers: 3, // Mínimo de respuestas correctas para pasar un nivel
 }
 
@@ -313,7 +313,7 @@ export const levelsData = [
   },
   {
     id: 3,
-    title: "Valores, Misión y Visión",
+    title: "Fundamentos del SG-SST",
     icon: "heart",
     type: "interactive-game", // Nuevo tipo para identificar que usa el componente de juego
     content: [
@@ -327,9 +327,9 @@ export const levelsData = [
       }
     ],
     achievement: {
-      name: "Maestro de Valores",
+      name: "Experto en SG-SST",
       icon: "gem",
-      description: "¡Has dominado nuestros valores, misión y visión a través del juego interactivo!"
+      description: "¡Has demostrado tu comprensión de los fundamentos del Sistema de Gestión de Seguridad y Salud en el Trabajo!"
     }
   },
   {
@@ -451,11 +451,11 @@ export const levelsData = [
     content: [
       {
         type: "heading",
-        text: "Comités Internos de Solutions and Payroll"
+        text: "Comités Internos en Solutions and Payroll"
       },
       {
         type: "paragraph",
-        text: "Para fomentar la participación y el bienestar de todos los colaboradores, contamos con diversos comités que trabajan en áreas específicas."
+        text: "En Solutions and Payroll, los comités internos son fundamentales para fomentar la comunicación, la colaboración y el bienestar de todos los colaboradores."
       },
       {
         type: "subheading",
@@ -463,15 +463,23 @@ export const levelsData = [
       },
       {
         type: "paragraph",
-        text: "Se encarga de promover actividades recreativas, celebraciones y programas que mejoren la calidad de vida laboral y el clima organizacional."
+        text: "Se encarga de promover actividades y programas que contribuyan al bienestar físico, mental y emocional de los empleados."
       },
       {
         type: "subheading",
-        text: "Comité de Seguridad y Salud"
+        text: "Comité de Seguridad y Salud en el Trabajo"
       },
       {
         type: "paragraph",
-        text: "Vela por mantener un entorno de trabajo seguro, implementando protocolos de prevención y atención de emergencias, así como programas de salud ocupacional."
+        text: "Su objetivo es velar por el cumplimiento de las normas de seguridad y salud, previniendo riesgos y promoviendo un ambiente laboral seguro."
+      },
+      {
+        type: "subheading",
+        text: "Comité de Calidad"
+      },
+      {
+        type: "paragraph",
+        text: "Busca garantizar la calidad en todos los procesos y servicios de la empresa, implementando mejoras continuas."
       },
       {
         type: "subheading",
@@ -479,81 +487,76 @@ export const levelsData = [
       },
       {
         type: "paragraph",
-        text: "Impulsa la generación e implementación de ideas innovadoras que mejoren nuestros servicios y procesos internos, fomentando la participación de todos los colaboradores."
-      },
-      {
-        type: "subheading",
-        text: "Comité de Responsabilidad Social"
-      },
-      {
-        type: "paragraph",
-        text: "Coordina las iniciativas de impacto social y ambiental de la empresa, promoviendo el voluntariado corporativo y prácticas sostenibles."
-      },
-      {
-        type: "subheading",
-        text: "Comité de Ética"
-      },
-      {
-        type: "paragraph",
-        text: "Supervisa el cumplimiento del código de ética y valores corporativos, atendiendo consultas y situaciones que requieran orientación en materia de conducta profesional."
+        text: "Fomenta la creatividad y la innovación entre los colaboradores, impulsando el desarrollo de nuevas ideas y proyectos."
       }
     ],
     quiz: [
       {
-        question: "¿Qué comité se encarga de promover actividades recreativas y celebraciones?",
+        question: "¿Cuál es la función del Comité de Bienestar?",
         options: [
-          "Comité de Ética",
-          "Comité de Bienestar",
-          "Comité de Innovación",
-          "Comité de Seguridad y Salud"
+          "Aumentar la carga laboral",
+          "Promover actividades para el bienestar de los empleados",
+          "Reducir el salario de los empleados",
+          "Limitar la comunicación entre áreas"
         ],
         correctAnswer: 1
       },
       {
-        question: "¿Cuál es la función principal del Comité de Seguridad y Salud?",
+        question: "¿Qué busca el Comité de Seguridad y Salud en el Trabajo?",
         options: [
-          "Organizar fiestas corporativas",
-          "Implementar nuevas tecnologías",
-          "Mantener un entorno de trabajo seguro",
-          "Coordinar actividades de voluntariado"
+          "Incrementar los riesgos laborales",
+          "Velar por el cumplimiento de normas de seguridad y salud",
+          "Eliminar el descanso de los empleados",
+          "Prohibir el uso de elementos de protección"
         ],
-        correctAnswer: 2
+        correctAnswer: 1
       },
       {
-        question: "¿Qué impulsa el Comité de Innovación?",
+        question: "¿Cuál es el objetivo del Comité de Calidad?",
         options: [
-          "La generación e implementación de ideas innovadoras",
-          "El cumplimiento estricto de las normas tradicionales",
-          "La reducción de costos operativos únicamente",
-          "La competencia entre departamentos"
+          "Garantizar la calidad en procesos y servicios",
+          "Reducir la calidad para disminuir costos",
+          "Aumentar el tiempo de entrega",
+          "Limitar la capacitación en calidad"
         ],
         correctAnswer: 0
       },
       {
-        question: "¿Qué coordina el Comité de Responsabilidad Social?",
+        question: "¿Qué fomenta el Comité de Innovación?",
         options: [
-          "Las políticas de recursos humanos",
-          "Las iniciativas de impacto social y ambiental",
-          "Los procesos de reclutamiento",
-          "Las estrategias de marketing"
+          "La rutina y el estancamiento",
+          "La creatividad y el desarrollo de nuevas ideas",
+          "La competencia desleal entre empleados",
+          "El incumplimiento de procesos"
         ],
         correctAnswer: 1
-      },
-      {
-        question: "¿Qué supervisa el Comité de Ética?",
-        options: [
-          "El presupuesto de la empresa",
-          "Las actividades recreativas",
-          "El cumplimiento del código de ética y valores corporativos",
-          "Los horarios de trabajo"
-        ],
-        correctAnswer: 2
       }
     ],
     achievement: {
-      name: "Experto en Comités",
-      icon: "users-cog",
-      description: "¡Has aprendido sobre los comités que hacen de Solutions and Payroll un gran lugar para trabajar!"
+      name: "Colaborador Activo",
+      icon: "users",
+      description: "¡Has aprendido sobre la importancia de los comités internos en Solutions and Payroll!"
+    }
+  },
+  {
+    id: 6,
+    title: "Accidentalidad",
+    icon: "exclamation-triangle",
+    type: "accident-level",
+    content: [
+      {
+        type: "heading",
+        text: "Accidentalidad en Solutions and Payroll"
+      },
+      {
+        type: "paragraph",
+        text: "Próximamente aprenderás sobre la prevención y gestión de accidentes laborales en Solutions and Payroll."
+      }
+    ],
+    achievement: {
+      name: "Conocedor de Accidentalidad",
+      icon: "exclamation-triangle",
+      description: "¡Has aprendido los conceptos clave sobre accidentalidad laboral!"
     }
   }
 ]

@@ -107,6 +107,23 @@
     }
 }
 
+/* Animación para las estrellas */
+@keyframes star-twinkle {
+    0%, 100% {
+        opacity: 0.2;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+}
+
+/* Clases de animación */
+.animate-star-twinkle {
+    animation: star-twinkle 2s ease-in-out infinite;
+}
+
 /* Aplicación de animaciones a elementos */
 
 /* Animación del logo en la pantalla de bienvenida */

@@ -68,6 +68,7 @@ const Map = () => {
     { id: 3, worldX: -1200, worldY: 1800, level: levelsData[2] },
     { id: 4, worldX: 1800, worldY: 1400, level: levelsData[3] },
     { id: 5, worldX: 0, worldY: 0, level: levelsData[4] },
+    { id: 6, worldX: -2200, worldY: 800, level: levelsData[5] }, // Accidentalidad
     { id: 'final', worldX: 0, worldY: -2500, level: { id: 'final', title: 'Logro Final', icon: 'trophy' } }
   ]
   

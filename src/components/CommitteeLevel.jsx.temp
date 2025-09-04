@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useAppContext } from '../context/AppContext';
 import { 
   faClipboardCheck, faSearch, faLightbulb, 
   faShieldAlt, faUsers, faComments, faHandshake, faStar, 
-  faMedal, faIdCard, faBuilding, faArrowLeft
+  faMedal, faIdCard, faBuilding 
 } from '@fortawesome/free-solid-svg-icons';
 
 const committees = [
@@ -87,12 +84,12 @@ const quizQuestions = [
     type: 'dragdrop',
     question: 'Arrastra cada integrante al comité al que pertenece',
     members: [
-      { name: 'Tatiana Chavarro', committee: 'COPASST', img: '../../../img/Tatiana.png' },
-      { name: 'Giovanna Gio', committee: 'CCL', img: '../../../img/Giovanna.png' },
-      { name: 'Dayan Manjarres', committee: 'COPASST', img: '../../../img/Dayana.png' },
-      { name: 'Yuly Peña', committee: 'CCL', img: '../../../img/Yuly.png' },
-      { name: 'Germán Hincapié', committee: 'COPASST', img: '../../../img/German.png' },
-      { name: 'Fabián Morales', committee: 'CCL', img: '../../../img/Fabian.png' }
+      { name: 'Tatiana Chavarro', committee: 'COPASST' },
+      { name: 'Giovanna Gio', committee: 'CCL' },
+      { name: 'Dayan Manjarres', committee: 'COPASST' },
+      { name: 'Yuly Peña', committee: 'CCL' },
+      { name: 'Germán Hincapié', committee: 'COPASST' },
+      { name: 'Fabián Morales', committee: 'CCL' }
     ],
     committees: ['COPASST', 'CCL']
   }
@@ -104,32 +101,7 @@ const sectionTabs = [
   { key: 'quiz', label: 'Quiz', icon: faStar }
 ];
 
-const StarField = () => {
-  const [stars] = useState(Array(50).fill().map((_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-  })));
-
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {stars.map((star) => (
-        <div
-          key={star.id}
-          className="absolute w-1 h-1 bg-white rounded-full opacity-60 animate-star-twinkle"
-          style={{
-            left: `${star.left}%`,
-            top: `${star.top}%`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
 const CommitteeLevel = ({ onComplete }) => {
-  const navigate = useNavigate();
-  const { completeLevel } = useAppContext();
   const [section, setSection] = useState('members');
   const [quizIndex, setQuizIndex] = useState(0);
   const [selected, setSelected] = useState(null);
@@ -194,36 +166,17 @@ const CommitteeLevel = ({ onComplete }) => {
         setDroppedMembers({ COPASST: [], CCL: [] });
       }
     } else {
-      if (score >= 300) {
-        // Si alcanzó el puntaje mínimo, completar el nivel y redirigir al achievement
-        completeLevel(5);
-        setTimeout(() => {
-          onComplete();
-          navigate('/achievement/5');
-        }, 300);
-      } else {
-        setShowResult(true);
-        setSection('result');
-      }
+      setShowResult(true);
+      setSection('result');
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <StarField />
         <div className="absolute inset-0 bg-white/5 backdrop-blur-2xl" />
       </div>
       <div className="relative z-10 max-w-[1600px] mx-auto py-10 px-10 animate-fade-in">
-        {/* Botón Volver al Mapa */}
-        <button
-          onClick={() => navigate('/map')}
-          className="absolute top-8 left-8 text-white hover:text-yellow-400 transition-colors flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-4 py-2 cursor-pointer"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} />
-          <span>Volver al Mapa</span>
-        </button>
-
         {/* Navigation Tabs */}
         <div className="flex justify-center gap-6 mb-8">
           {sectionTabs.map(tab => (
@@ -257,7 +210,7 @@ const CommitteeLevel = ({ onComplete }) => {
                 <p className="text-white/80 mb-4">{com.description}</p>
                 <div className="flex flex-col gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-purple-300 mb-4">Representantes de los trabajadores</h3>
+                    <h3 className="text-lg font-semibold text-purple-300 mb-4">Trabajadores</h3>
                     <div className="flex flex-wrap gap-6 justify-center">
                       {com.members.workers.map((m, idx) => (
                         <div
@@ -278,7 +231,7 @@ const CommitteeLevel = ({ onComplete }) => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-violet-300 mb-4">Representantes del empleador</h3>
+                    <h3 className="text-lg font-semibold text-violet-300 mb-4">Empleador</h3>
                     <div className="flex flex-wrap gap-6 justify-center">
                       {com.members.employer.map((m, idx) => (
                         <div
@@ -347,17 +300,12 @@ const CommitteeLevel = ({ onComplete }) => {
                 />
               </div>
             </div>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <span className="text-white/80">Puntaje: </span>
-                <span className="text-purple-300 font-bold">{score}</span>
-                {streak > 1 && (
-                  <span className="ml-4 text-purple-400">🔥 Racha: {streak}</span>
-                )}
-              </div>
-              <div className="text-white/80">
-                Mínimo para pasar: <span className="text-purple-300 font-bold">300</span>
-              </div>
+            <div className="mb-6">
+              <span className="text-white/80">Puntaje: </span>
+              <span className="text-purple-300 font-bold">{score}</span>
+              {streak > 1 && (
+                <span className="ml-4 text-purple-400">🔥 Racha: {streak}</span>
+              )}
             </div>
 
             {quizQuestions[quizIndex].type === 'case' ? (
@@ -427,18 +375,11 @@ const CommitteeLevel = ({ onComplete }) => {
                         {droppedMembers[committee].map(member => (
                           <div 
                             key={member.name}
-                            className="px-4 py-2 mb-2 bg-purple-500/20 rounded-lg text-white flex items-center gap-3 animate-fade-in"
+                            className="px-4 py-2 mb-2 bg-purple-500/20 rounded-lg text-white flex justify-between items-center animate-fade-in"
                             onClick={() => handleRemoveMember(member.name, committee)}
                           >
-                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                              <img 
-                                src={member.img} 
-                                alt={member.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
                             <span>{member.name}</span>
-                            <button className="text-white/60 hover:text-white ml-auto">×</button>
+                            <button className="text-white/60 hover:text-white">×</button>
                           </div>
                         ))}
                       </div>
@@ -453,19 +394,12 @@ const CommitteeLevel = ({ onComplete }) => {
                     ).map(member => (
                       <div
                         key={member.name}
-                        className="px-4 py-2 bg-purple-500/20 rounded-lg text-white cursor-move hover:bg-purple-500/30 transition-colors flex items-center gap-3"
+                        className="px-4 py-2 bg-purple-500/20 rounded-lg text-white cursor-move hover:bg-purple-500/30 transition-colors"
                         draggable
                         onDragStart={e => {
                           e.dataTransfer.setData('text', JSON.stringify(member));
                         }}
                       >
-                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                          <img 
-                            src={member.img} 
-                            alt={member.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
                         {member.name}
                       </div>
                     ))}
