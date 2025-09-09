@@ -35,6 +35,14 @@ const riskCards = [
 const AccidentLevel = () => {
   const navigate = useNavigate();
   const [showQuiz, setShowQuiz] = useState(false);
+  // Estado para controlar si el usuario está en el quiz
+  const handleQuizButton = () => {
+    if (showQuiz) {
+      setShowQuiz(false);
+    } else {
+      setShowQuiz(true);
+    }
+  };
   // Animación de estrellas como en el nivel 1
   const stars = useMemo(() => {
     return [...Array(50)].map((_, i) => ({
@@ -48,13 +56,12 @@ const AccidentLevel = () => {
 
   // Animación para el botón de quiz
   const quizButtonVariants = {
-    initial: { scale: 1, boxShadow: '0 0 0px #fbbf24' },
+    initial: { boxShadow: '0 0 0px #a78bfa' }, // morado
     animate: {
-      scale: [1, 1.08, 1],
       boxShadow: [
-        '0 0 0px #fbbf24',
-        '0 0 16px #fbbf24',
-        '0 0 0px #fbbf24'
+        '0 0 0px #a78bfa', // morado claro
+        '0 0 16px #a78bfa', // resplandor morado
+        '0 0 0px #a78bfa'
       ],
       transition: { duration: 1.5, repeat: Infinity }
     }
@@ -82,30 +89,32 @@ const AccidentLevel = () => {
       {/* Botón volver al mapa */}
       <div className="absolute top-8 left-8 z-20">
         <button
-          onClick={() => navigate('/map')}
+          onClick={() => {
+            if (showQuiz) {
+              setShowQuiz(false);
+            } else {
+              navigate('/map');
+            }
+          }}
           className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors font-semibold text-lg cursor-pointer focus:outline-none px-4 py-2 rounded-xl"
           style={{ minHeight: '48px', lineHeight: '1.5' }}
         >
           <FontAwesomeIcon icon={faArrowLeft} />
-          <span>Volver al mapa</span>
+          <span>{showQuiz ? 'Volver' : 'Volver al mapa'}</span>
         </button>
       </div>
       {/* Botón animado iniciar quiz */}
-      <motion.div
-        initial="initial"
-        animate="animate"
-        variants={quizButtonVariants}
-        {...{className: "absolute top-8 right-8 z-20"}}
-      >
-        <button
-          onClick={() => setShowQuiz(true)}
-          className="flex items-center gap-2 bg-yellow-400 text-slate-900 font-bold px-6 py-3 rounded-xl shadow-lg hover:bg-yellow-500 transition-colors text-lg animate-pulse"
-          style={{ minHeight: '48px' }}
-        >
-          <FontAwesomeIcon icon={faPlayCircle} className="text-xl" />
-          <span>Iniciar Quiz</span>
-        </button>
-      </motion.div>
+      {!showQuiz && (
+        <div className="fixed top-8 right-8 z-30">
+          <button
+            onClick={handleQuizButton}
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-purple-500/25 border border-indigo-400/70 transition-colors text-lg transform hover:scale-105 transition-transform duration-300 delay-100"
+          >
+            <FontAwesomeIcon icon={faPlayCircle} className="text-xl" />
+            <span>Iniciar Quiz</span>
+          </button>
+        </div>
+      )}
       {/* Contenido principal o quiz */}
       {!showQuiz ? (
         <div className="relative z-10 flex flex-col items-center justify-start">

@@ -19,18 +19,18 @@ const Achievement = () => {
   
   useEffect(() => {
     // Verificar si el nivel existe, está desbloqueado y completado
-    if (!level || !isLevelUnlocked(levelIdNum) || !completedLevels.includes(levelIdNum)) {
-      navigate('/map')
-      return
-    }
-    
+    // if (!level || !isLevelUnlocked(levelIdNum) || !completedLevels.includes(levelIdNum)) {
+    //   navigate('/map')
+    //   return
+    // }
+    //
     // Asegurarse de que el nivel esté marcado como completado
-    if (!completedLevels.includes(levelIdNum)) {
-      completeLevel(levelIdNum)
-    }
-    
-    // Generar estrellas para el nivel 1, 2, 3, 4 y 5 (políticas, funciones empresariales, valores, jerarquía y comités)
-    if (levelIdNum === 1 || levelIdNum === 2 || levelIdNum === 3 || levelIdNum === 4 || levelIdNum === 5) {
+    // if (!completedLevels.includes(levelIdNum)) {
+    //   completeLevel(levelIdNum)
+    // }
+    //
+    // Generar estrellas para el nivel 1, 2, 3, 4, 5 y 6 (políticas, funciones empresariales, valores, jerarquía, comités y accidentes)
+    if (levelIdNum === 1 || levelIdNum === 2 || levelIdNum === 3 || levelIdNum === 4 || levelIdNum === 5 || levelIdNum === 6) {
       const generatedStars = Array.from({ length: 50 }, (_, i) => ({
         id: i,
         left: Math.random() * 100,
@@ -397,61 +397,123 @@ const Achievement = () => {
       </div>
     )
   }
+
+
+  
+  // Si es el nivel 6 (accidentes y riesgos), usar el mismo estilo espacial
+  if (levelIdNum === 6) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex items-center justify-center">
+        {/* Estrellas de fondo */}
+        <div className="absolute inset-0 overflow-hidden">
+          {stars.map((star) => (
+            <motion.div
+              key={star.id}
+              className="absolute w-1 h-1 bg-white rounded-full opacity-60"
+              style={{ left: `${star.left}%`, top: `${star.top}%` }}
+              animate={{
+                opacity: [0.3, 1, 0.3],
+                scale: [0.5, 1.5, 0.5],
+              }}
+              transition={{
+                duration: star.duration,
+                repeat: Infinity,
+                delay: star.delay,
+              }}
+            />
+          ))}
+        </div>
+
+        <motion.div
+          className="text-center z-10"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, type: "spring" }}
+        >
+          <motion.div
+            className="text-8xl text-yellow-400 mb-6"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <FontAwesomeIcon icon={iconMap[level.achievement.icon] || faAward} />
+          </motion.div>
+          <h2 className="text-4xl font-bold text-white mb-4">¡Felicitaciones!</h2>
+          <p className="text-xl text-white/80 mb-2">Has completado el nivel {level.title}</p>
+          {/* Información del achievement */}
+          <motion.div
+            className="bg-white/10 backdrop-blur-md rounded-xl p-6 mb-8 border border-white/20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{level.achievement.name}</h3>
+            <p className="text-white/80">{level.achievement.description}</p>
+          </motion.div>
+          <motion.button
+            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-green-500/25 border border-green-400/50"
+            onClick={handleContinue}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            Continuar al siguiente nivel
+          </motion.button>
+        </motion.div>
+      </div>
+    )
+  }
   
   // Para otros niveles, usar el estilo original
   return (
     <motion.div 
-      className="min-h-screen flex items-center justify-center bg-light p-4"
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', padding: '1rem' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
       <Confetti />
-      
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+      <div style={{ maxWidth: '28rem', width: '100%', background: 'white', borderRadius: '1rem', boxShadow: '0 4px 24px 0 #0001', padding: '2rem', textAlign: 'center' }}>
         <motion.div 
-          className="badge mx-auto mb-6"
+          style={{ display: 'block', margin: '0 auto 1.5rem auto', width: '4rem', height: '4rem' }}
           initial={{ scale: 0, rotate: -45, opacity: 0 }}
           animate={{ scale: 1, rotate: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.2 }}
         >
           <FontAwesomeIcon 
             icon={iconMap[level.achievement.icon] || faAward} 
-            className="text-primary"
+            style={{ color: '#6366f1', fontSize: '4rem' }}
           />
         </motion.div>
-        
         <motion.h2 
-          className="text-3xl font-bold text-secondary mb-4"
+          style={{ fontSize: '2rem', fontWeight: 'bold', color: '#6366f1', marginBottom: '1rem' }}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
           ¡Felicidades!
         </motion.h2>
-        
         <motion.p 
-          className="text-xl text-accent mb-6"
+          style={{ fontSize: '1.25rem', color: '#6366f1', marginBottom: '1.5rem' }}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Has completado el nivel <span className="font-bold">{level.title}</span>
+          Has completado el nivel <span style={{ fontWeight: 'bold' }}>{level.title}</span>
         </motion.p>
-        
         <motion.div 
-          className="bg-gray-50 p-4 rounded-lg mb-8"
+          style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.75rem', marginBottom: '2rem' }}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <h3 className="font-bold text-lg text-secondary mb-2">{level.achievement.name}</h3>
-          <p className="text-gray-700">{level.achievement.description}</p>
+          <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', color: '#6366f1', marginBottom: '0.5rem' }}>{level.achievement.name}</h3>
+          <p style={{ color: '#374151' }}>{level.achievement.description}</p>
         </motion.div>
-        
         <motion.button
-          className="btn-primary w-full"
+          style={{ background: 'linear-gradient(to right, #6366f1, #22d3ee)', color: 'white', width: '100%', padding: '1rem', borderRadius: '0.75rem', fontWeight: 'bold', fontSize: '1rem', boxShadow: '0 4px 24px 0 #6366f144', border: 'none', marginBottom: '0.5rem' }}
           onClick={handleContinue}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -459,7 +521,7 @@ const Achievement = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          Continuar <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+          Continuar <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: '0.5rem' }} />
         </motion.button>
       </div>
     </motion.div>

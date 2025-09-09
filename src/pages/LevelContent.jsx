@@ -29,6 +29,7 @@ import CompanyServicesLevel from '../components/CompanyServicesLevel'
 import ValuesGameLevel from '../components/ValuesGameLevel'
 import HierarchyLevel from '../components/HierarchyLevel'
 import AccidentLevel from '../components/AccidentLevel'
+import QualityLevel from '../components/QualityLevel'
 
 const LevelContent = () => {
   const { levelId } = useParams()
@@ -256,6 +257,11 @@ const LevelContent = () => {
   // Si es el nivel de comités (nivel 5), usar el componente especializado
   if (level && level.id === 5) {
     return <CommitteeLevel onComplete={() => navigate(`/achievement/${levelIdNum}`)} />
+  }
+
+  // Si es el nivel de gestión de calidad (nivel 7), usar el componente especializado
+  if (level && level.id === 7) {
+    return <QualityLevel />
   }
 
   const handleNextQuestion = () => {
