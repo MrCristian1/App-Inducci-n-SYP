@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookOpen, faTasks, faHeart, faUsers, faSitemap, faLock, faCheck, faArrowRight, faTrophy, faStar, faGem, faRocket, faBriefcase, faUsersCog, faAward } from '@fortawesome/free-solid-svg-icons'
+import { faBookOpen, faTasks, faHeart, faUsers, faSitemap, faLock, faCheck, faArrowRight, faTrophy, faStar, faGem, faRocket, faBriefcase, faUsersCog, faAward, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 import logo from '../../img/syp.png'
 import { useRef, useEffect, useState, useCallback } from 'react'
 
@@ -15,18 +15,20 @@ const Map = () => {
   
   // Mapeo de iconos de string a FontAwesome icons
   const iconMap = {
-    'book-open': faBookOpen,
-    'tasks': faTasks,
-    'heart': faHeart,
-    'users': faUsers,
-    'sitemap': faSitemap,
-    'briefcase': faBriefcase,
-    'users-cog': faUsersCog,
-    'award': faAward,
-    'gem': faGem,
     'star': faStar,
     'trophy': faTrophy,
-    'rocket': faRocket
+    'award': faAward,
+    'heart': faHeart,
+    'gem': faGem,
+    'exclamation-triangle': faExclamationTriangle,
+    'book-open': faBookOpen,
+    'tasks': faTasks,
+    'users': faUsers,
+    'sitemap': faSitemap,
+    'lock': faLock,
+    'rocket': faRocket,
+    'briefcase': faBriefcase,
+    'users-cog': faUsersCog
   }
   const { 
     levelsData, 
@@ -69,6 +71,7 @@ const Map = () => {
     { id: 4, worldX: 1800, worldY: 1400, level: levelsData[3] },
     { id: 5, worldX: 0, worldY: 0, level: levelsData[4] },
     { id: 6, worldX: -2200, worldY: 800, level: levelsData[5] }, // Accidentalidad
+    { id: 7, worldX: 1500, worldY: -1800, level: levelsData[6] }, // Sistema de gestión de calidad
     { id: 'final', worldX: 0, worldY: -2500, level: { id: 'final', title: 'Logro Final', icon: 'trophy' } }
   ]
   

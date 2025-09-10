@@ -6,29 +6,12 @@
 // Configuración general de la empresa
 export const companyConfig = {
   companyName: "Solutions and Payroll",
-  totalLevels: 6,
+  totalLevels: 7,
   requiredCorrectAnswers: 3, // Mínimo de respuestas correctas para pasar un nivel
 }
 
 // Datos de los niveles
 export const levelsData = [
-  {
-    id: 7,
-    title: "Sistema de gestión de calidad",
-    icon: "star",
-    color: "from-purple-900 via-purple-700 to-slate-900",
-    achievement: {
-      name: "Gestión de Calidad",
-      description: "Has explorado el sistema de gestión de calidad de la empresa y conoces sus fundamentos.",
-      icon: "star"
-    },
-    content: [
-      { type: "heading", text: "Sistema de gestión de calidad" },
-      { type: "paragraph", text: "El sistema de gestión de calidad es el conjunto de procesos, procedimientos y recursos que aseguran que los productos y servicios de la empresa cumplen con los estándares requeridos y las expectativas de los clientes." },
-      { type: "paragraph", text: "Incluye la mejora continua, auditorías internas, capacitación y el compromiso de todos los colaboradores." }
-    ],
-    quiz: [] // Puedes agregar preguntas aquí más adelante
-  },
   {
     id: 1,
     title: "Políticas de la empresa",
@@ -575,6 +558,23 @@ export const levelsData = [
       icon: "exclamation-triangle",
       description: "¡Has aprendido los conceptos clave sobre accidentalidad laboral!"
     }
+  },
+  {
+    id: 7,
+    title: "Sistema de gestión de calidad",
+    icon: "star",
+    color: "from-purple-900 via-purple-700 to-slate-900",
+    achievement: {
+      name: "Gestión de Calidad",
+      description: "Has explorado el sistema de gestión de calidad de la empresa y conoces sus fundamentos.",
+      icon: "star"
+    },
+    content: [
+      { type: "heading", text: "Sistema de gestión de calidad" },
+      { type: "paragraph", text: "El sistema de gestión de calidad es el conjunto de procesos, procedimientos y recursos que aseguran que los productos y servicios de la empresa cumplen con los estándares requeridos y las expectativas de los clientes." },
+      { type: "paragraph", text: "Incluye la mejora continua, auditorías internas, capacitación y el compromiso de todos los colaboradores." }
+    ],
+    quiz: [] // Puedes agregar preguntas aquí más adelante
   }
 ]
 

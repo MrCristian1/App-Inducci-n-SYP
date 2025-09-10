@@ -299,7 +299,15 @@ const QualityLevel = () => {
 
           {/* Botones */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {(gameWon || gameLost) && (
+            {gameWon && (
+              <button
+                onClick={() => navigate('/achievement/7')}
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105"
+              >
+                🏆 Reclamar Logro
+              </button>
+            )}
+            {gameLost && (
               <button
                 onClick={startNewGame}
                 className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:from-green-700 hover:to-blue-700 transition-all"

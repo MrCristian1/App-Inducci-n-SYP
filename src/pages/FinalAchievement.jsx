@@ -13,10 +13,10 @@ const FinalAchievement = () => {
   
   useEffect(() => {
     // Verificar si todos los niveles están completados
-    if (!allLevelsCompleted) {
-      navigate('/map');
-      return;
-    }
+   //  if (!allLevelsCompleted) {
+    //   navigate('/map');
+    //   return;
+    // }
     
     // Asegurarse de que la navegación funcione correctamente
     // después de completar todos los niveles
@@ -37,7 +37,7 @@ const FinalAchievement = () => {
   
   return (
     <motion.div 
-      className="min-h-screen bg-gradient-to-br from-primary to-secondary p-0 flex items-center justify-center overflow-hidden"
+      className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-0 flex items-center justify-center overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -78,14 +78,14 @@ const FinalAchievement = () => {
       <Confetti count={200} />
       
       <motion.div 
-        className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-10 text-center relative z-10 border-4 border-primary"
+        className="max-w-3xl mx-auto bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-10 text-center relative z-10 border border-white/20"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5, type: 'spring' }}
       >
         {/* Logo */}
         <motion.div 
-          className="w-32 h-32 mx-auto mb-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center shadow-lg"
+          className="w-32 h-32 mx-auto mb-8 bg-gradient-to-r from-blue-500/30 to-purple-500/30 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg border border-white/20"
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ duration: 0.8, type: "spring" }}
@@ -98,18 +98,18 @@ const FinalAchievement = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="bg-gradient-to-r from-primary-light to-secondary-light p-6 rounded-xl shadow-md"
+          className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-md border border-white/20"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
             ¡Felicidades!
           </h1>
-          <h2 className="text-2xl md:text-3xl font-semibold text-secondary mb-6">
+          <h2 className="text-2xl md:text-3xl font-semibold text-blue-300 mb-6">
             Has completado tu inducción
           </h2>
-          <p className="text-lg text-primary-dark mb-8">
-            Has obtenido el logro <span className="font-bold text-secondary">{finalAchievement?.name || "Logro Final"}</span>
+          <p className="text-lg text-white/90 mb-8">
+            Has obtenido el logro <span className="font-bold text-yellow-400">{finalAchievement?.name || "Logro Final"}</span>
           </p>
-          <p className="text-primary mb-12">{finalAchievement?.description || "Has completado con éxito todo el recorrido de inducción. ¡Ahora estás listo para formar parte de nuestro equipo!"}</p>
+          <p className="text-white/80 mb-12">{finalAchievement?.description || "Has completado con éxito todo el recorrido de inducción. ¡Ahora estás listo para formar parte de nuestro equipo!"}</p>
         </motion.div>
         
         <motion.div
@@ -119,9 +119,9 @@ const FinalAchievement = () => {
           transition={{ delay: 1.4 }}
         >
           <motion.button
-            className="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+            className="bg-gradient-to-r from-blue-500/30 to-blue-600/30 backdrop-blur-md text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 border border-white/20"
             onClick={handleBackToMap}
-            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.3)" }}
             whileTap={{ scale: 0.95 }}
           >
             <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
@@ -129,9 +129,9 @@ const FinalAchievement = () => {
           </motion.button>
           
           <motion.button
-            className="bg-gradient-to-r from-secondary to-secondary-dark text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+            className="bg-gradient-to-r from-purple-500/30 to-purple-600/30 backdrop-blur-md text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 border border-white/20"
             onClick={handleRestart}
-            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)" }}
             whileTap={{ scale: 0.95 }}
           >
             <FontAwesomeIcon icon={faRedo} className="text-xl" />
@@ -140,12 +140,12 @@ const FinalAchievement = () => {
         </motion.div>
         
         <motion.div
-          className="mt-10 pt-6 border-t border-gray-100 text-primary-dark text-sm"
+          className="mt-10 pt-6 border-t border-white/20 text-white/70 text-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.6 }}
         >
-          <p>© {new Date().getFullYear()} Todos los derechos reservados</p>
+          <p>© {new Date().getFullYear()} Solutions and Payroll - Todos los derechos reservados</p>
         </motion.div>
       </motion.div>
     </motion.div>
