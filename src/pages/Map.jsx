@@ -2,9 +2,10 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookOpen, faTasks, faHeart, faUsers, faSitemap, faLock, faCheck, faArrowRight, faTrophy, faStar, faGem, faRocket, faBriefcase, faUsersCog, faAward, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { faBookOpen, faTasks, faHeart, faUsers, faSitemap, faLock, faCheck, faArrowRight, faTrophy, faStar, faGem, faRocket, faBriefcase, faUsersCog, faAward, faExclamationTriangle, faCog } from '@fortawesome/free-solid-svg-icons'
 import logo from '../../img/syp.png'
 import { useRef, useEffect, useState, useCallback } from 'react'
+import OnboardingTour from '../components/OnboardingTour'
 
 const Map = () => {
   const navigate = useNavigate()
@@ -12,6 +13,7 @@ const Map = () => {
   const [stars, setStars] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [showInstructions, setShowInstructions] = useState(true)
+  const [showTour, setShowTour] = useState(true) // TEMPORAL: inicializar en true para testing
   
   // Mapeo de iconos de string a FontAwesome icons
   const iconMap = {
@@ -28,7 +30,8 @@ const Map = () => {
     'lock': faLock,
     'rocket': faRocket,
     'briefcase': faBriefcase,
-    'users-cog': faUsersCog
+    'users-cog': faUsersCog,
+    'cog': faCog
   }
   const { 
     levelsData, 
@@ -47,6 +50,26 @@ const Map = () => {
   const isLevelUnlocked = (levelId) => {
     if (levelId === 1) return true
     return completedLevels.includes(levelId - 1)
+  }
+
+  // Verificar si mostrar el tour al cargar la página
+  useEffect(() => {
+    // TEMPORAL: Mostrar tour siempre para testing
+    console.log('🎮 Iniciando tour de onboarding')
+    setShowTour(true)
+    
+    // Código original comentado para restaurar después:
+    // const hasSeenTour = localStorage.getItem('hasSeenOnboardingTour')
+    // if (completedLevels.length === 0 && !hasSeenTour) {
+    //   setShowTour(true)
+    // }
+  }, []) // Quitar dependencias para que solo se ejecute una vez
+
+  const handleTourComplete = () => {
+    console.log('🎮 Tour completado')
+    // TEMPORAL: No guardar en localStorage para testing
+    // localStorage.setItem('hasSeenOnboardingTour', 'true')
+    setShowTour(false)
   }
   
   // World coordinates system (infinite world)
@@ -72,6 +95,7 @@ const Map = () => {
     { id: 5, worldX: 0, worldY: 0, level: levelsData[4] },
     { id: 6, worldX: -2200, worldY: 800, level: levelsData[5] }, // Accidentalidad
     { id: 7, worldX: 1500, worldY: -1800, level: levelsData[6] }, // Sistema de gestión de calidad
+    { id: 8, worldX: -1800, worldY: -2200, level: levelsData[7] }, // Mapa de Procesos
     { id: 'final', worldX: 0, worldY: -2500, level: { id: 'final', title: 'Logro Final', icon: 'trophy' } }
   ]
   
@@ -930,6 +954,13 @@ const Map = () => {
         )}
       </AnimatePresence>
 
+      {/* Onboarding Tour */}
+      <OnboardingTour 
+        isVisible={showTour}
+        onComplete={handleTourComplete}
+      />
+
+      
 
     </motion.div>
   )

@@ -55,6 +55,8 @@ export default {
         'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.5s ease-out',
         'scale-in': 'scaleIn 0.5s ease-out',
+        'star-twinkle': 'starTwinkle 2s ease-in-out infinite',
+        'fade-in-up': 'fadeInUp 0.6s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -88,6 +90,14 @@ export default {
         scaleIn: {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        starTwinkle: {
+          '0%, 100%': { opacity: '0.2', transform: 'scale(0.5)' },
+          '50%': { opacity: '1', transform: 'scale(1.5)' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
       boxShadow: {

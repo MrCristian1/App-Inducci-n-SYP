@@ -109,6 +109,7 @@ const StarField = () => {
     id: i,
     left: Math.random() * 100,
     top: Math.random() * 100,
+    delay: Math.random() * 2,
   })));
 
   return (
@@ -120,6 +121,7 @@ const StarField = () => {
           style={{
             left: `${star.left}%`,
             top: `${star.top}%`,
+            animationDelay: `${star.delay}s`,
           }}
         />
       ))}

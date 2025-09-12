@@ -30,6 +30,7 @@ import ValuesGameLevel from '../components/ValuesGameLevel'
 import HierarchyLevel from '../components/HierarchyLevel'
 import AccidentLevel from '../components/AccidentLevel'
 import QualityLevel from '../components/QualityLevel'
+import ProcessMapLevel from '../components/ProcessMapLevel'
 
 const LevelContent = () => {
   const { levelId } = useParams()
@@ -262,6 +263,11 @@ const LevelContent = () => {
   // Si es el nivel de gestión de calidad (nivel 7), usar el componente especializado
   if (level && level.id === 7) {
     return <QualityLevel />
+  }
+
+  // Si es el nivel de mapa de procesos (nivel 8), usar el componente especializado
+  if (level && level.id === 8) {
+    return <ProcessMapLevel />
   }
 
   const handleNextQuestion = () => {

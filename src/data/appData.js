@@ -6,7 +6,7 @@
 // Configuración general de la empresa
 export const companyConfig = {
   companyName: "Solutions and Payroll",
-  totalLevels: 7,
+  totalLevels: 8,
   requiredCorrectAnswers: 3, // Mínimo de respuestas correctas para pasar un nivel
 }
 
@@ -575,6 +575,23 @@ export const levelsData = [
       { type: "paragraph", text: "Incluye la mejora continua, auditorías internas, capacitación y el compromiso de todos los colaboradores." }
     ],
     quiz: [] // Puedes agregar preguntas aquí más adelante
+  },
+  {
+    id: 8,
+    title: "Mapa de Procesos",
+    icon: "cog",
+    color: "from-indigo-900 via-indigo-700 to-slate-900",
+    achievement: {
+      name: "Experto en Procesos",
+      description: "Has comprendido el mapa de procesos de Solutions and Payroll y su importancia en la organización.",
+      icon: "cog"
+    },
+    content: [
+      { type: "heading", text: "Mapa de Procesos" },
+      { type: "paragraph", text: "El mapa de procesos es una representación gráfica que muestra los procesos de una organización y sus interrelaciones. Permite visualizar cómo se crean valor y se entregan resultados a los clientes." },
+      { type: "paragraph", text: "En Solutions and Payroll, nuestros procesos están diseñados para garantizar la excelencia operacional y la satisfacción del cliente." }
+    ],
+    quiz: []
   }
 ]
 
