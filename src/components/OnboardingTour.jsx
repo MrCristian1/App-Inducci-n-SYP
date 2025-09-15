@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// ...existing code...
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -21,6 +22,8 @@ const OnboardingTour = ({ onComplete, isVisible }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showTour, setShowTour] = useState(isVisible);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // Guardar el paso anterior para detectar la transición de 0 a 1
+  const [prevStep, setPrevStep] = useState(0);
 
   const tourSteps = [
     {
@@ -48,7 +51,7 @@ const OnboardingTour = ({ onComplete, isVisible }) => {
     title: 'Tus Insignias de Logros 🏆',
     description: 'Cada círculo representa un nivel. Los dorados están completados, los azules están disponibles, y los grises están bloqueados.',
     position: 'center',
-      spotlight: { x: '24px', y: '380px', width: '272px', height: '180px' },
+    spotlight: { x: '24px', y: '380px', width: '272px', height: '200px' },
       icon: faGem,
       gradient: 'from-yellow-500 to-orange-500',
       action: 'Siguiente'
@@ -76,6 +79,30 @@ const OnboardingTour = ({ onComplete, isVisible }) => {
   ];
 
   const currentStepData = tourSteps[currentStep];
+
+  // Animación de entrada solo cuando el spotlight aparece por primera vez
+  const [showSpotlight, setShowSpotlight] = useState(false);
+  const [spotlightAnim, setSpotlightAnim] = useState(false);
+  useEffect(() => {
+    // Solo animar cuando pasamos del paso 0 (bienvenida) al paso 1 (panel de control)
+    if (prevStep === 0 && currentStep === 1 && showTour) {
+      setShowSpotlight(false);
+      setSpotlightAnim(false);
+      setTimeout(() => {
+        setShowSpotlight(true);
+        setSpotlightAnim(true);
+        setTimeout(() => setSpotlightAnim(false), 500);
+      }, 50);
+    } else {
+      setShowSpotlight(true);
+      setSpotlightAnim(false);
+    }
+  }, [currentStep, showTour, prevStep]);
+
+  // Actualizar prevStep después de cada cambio de currentStep
+  useEffect(() => {
+    setPrevStep(currentStep);
+  }, [currentStep]);
 
   // Sincronizar el estado interno con las props
   useEffect(() => {
@@ -167,19 +194,19 @@ const OnboardingTour = ({ onComplete, isVisible }) => {
       )}
       
       {/* Borde destacado alrededor del área clara */}
-      {currentStepData.spotlight && (
-        <div
-          className="absolute border-4 border-yellow-400/90 rounded-lg pointer-events-none transition-all duration-500 ease-in-out"
-          style={{
-            left: currentStepData.spotlight.x,
-            top: currentStepData.spotlight.y,
-            width: currentStepData.spotlight.width,
-            height: currentStepData.spotlight.height,
-            boxShadow: '0 0 30px rgba(251, 191, 36, 0.5)',
-            animation: 'pulse-border 3s ease-in-out infinite'
-          }}
-        />
-      )}
+        {currentStepData.spotlight && showSpotlight && (
+          <div
+            className={`absolute border-4 border-yellow-400/90 rounded-lg pointer-events-none transition-all duration-500 ease-in-out${spotlightAnim ? ' animate-spotlight-in' : ''}`}
+            style={{
+              left: currentStepData.spotlight.x,
+              top: currentStepData.spotlight.y,
+              width: currentStepData.spotlight.width,
+              height: currentStepData.spotlight.height,
+              boxShadow: '0 0 30px rgba(251, 191, 36, 0.5)',
+              animation: 'pulse-border 3s ease-in-out infinite'
+            }}
+          />
+        )}
       
       {/* Contenido del tour */}
       <div className="relative h-full flex items-center justify-center p-8 pointer-events-auto">
@@ -301,6 +328,25 @@ const OnboardingTour = ({ onComplete, isVisible }) => {
               box-shadow: 0 0 40px rgba(251, 191, 36, 0.6);
             }
           }
+
+              @keyframes spotlight-in {
+                0% {
+                  opacity: 0;
+                  transform: scale(0.7);
+                }
+                100% {
+                  opacity: 1;
+                  transform: scale(1);
+                }
+              }
+              .animate-spotlight-in {
+                animation: spotlight-in 0.5s cubic-bezier(0.4,0,0.2,1);
+              }
+  // Guardar el paso anterior para detectar la transición de null a spotlight
+  const [prevStep, setPrevStep] = useState(0);
+  useEffect(() => {
+    setPrevStep(currentStep);
+  }, [currentStep]);
           
           @keyframes fade-in {
             from { opacity: 0; transform: translateY(20px); }

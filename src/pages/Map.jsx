@@ -15,6 +15,45 @@ const Map = () => {
   const [showInstructions, setShowInstructions] = useState(true)
   const [showTour, setShowTour] = useState(true) // TEMPORAL: inicializar en true para testing
   
+  // Generar estrellas una sola vez
+  const [backgroundStars] = useState(() => 
+    Array.from({ length: 100 }, (_, i) => ({
+      id: i,
+      size: Math.random() * 3 + 1,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 3 + 2,
+      delay: Math.random() * 4
+    }))
+  )
+
+  // Estado para meteoritos
+  const [meteorites, setMeteorites] = useState([])
+
+  // Generar meteoritos cada 2 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newMeteorite = {
+        id: Date.now(),
+        startX: Math.random() * 100,
+        startY: -10,
+        endX: Math.random() * 100,
+        endY: 110,
+        duration: Math.random() * 2 + 3, // 3-5 segundos
+        size: Math.random() * 5 + 4 // 4-9px (más grandes)
+      }
+      
+      setMeteorites(prev => [...prev, newMeteorite])
+      
+      // Remover meteorito después de la animación
+      setTimeout(() => {
+        setMeteorites(prev => prev.filter(m => m.id !== newMeteorite.id))
+      }, (newMeteorite.duration + 1) * 1000)
+    }, 2000)
+
+    return () => clearInterval(interval)
+  }, [])
+  
   // Mapeo de iconos de string a FontAwesome icons
   const iconMap = {
     'star': faStar,
@@ -54,21 +93,21 @@ const Map = () => {
 
   // Verificar si mostrar el tour al cargar la página
   useEffect(() => {
-    // TEMPORAL: Mostrar tour siempre para testing
-    console.log('🎮 Iniciando tour de onboarding')
-    setShowTour(true)
+    // Verificar si el usuario ya ha completado algún nivel o ha visto el tour
+    const hasSeenTour = localStorage.getItem('hasSeenOnboardingTour')
+    const hasStartedAnyLevel = completedLevels.length > 0
     
-    // Código original comentado para restaurar después:
-    // const hasSeenTour = localStorage.getItem('hasSeenOnboardingTour')
-    // if (completedLevels.length === 0 && !hasSeenTour) {
-    //   setShowTour(true)
-    // }
-  }, []) // Quitar dependencias para que solo se ejecute una vez
+    if (!hasSeenTour && !hasStartedAnyLevel) {
+      console.log('🎮 Iniciando tour de onboarding')
+      setShowTour(true)
+    } else {
+      setShowTour(false)
+    }
+  }, [completedLevels]) // Dependencia de completedLevels para reaccionar a cambios
 
   const handleTourComplete = () => {
     console.log('🎮 Tour completado')
-    // TEMPORAL: No guardar en localStorage para testing
-    // localStorage.setItem('hasSeenOnboardingTour', 'true')
+    localStorage.setItem('hasSeenOnboardingTour', 'true')
     setShowTour(false)
   }
   
@@ -345,6 +384,12 @@ const Map = () => {
   
   const handleLevelClick = (levelId) => {
     if (isLevelUnlocked(levelId)) {
+      // Si es el primer nivel, desactivar el tour permanentemente
+      if (levelId === 1) {
+        localStorage.setItem('hasSeenOnboardingTour', 'true')
+        setShowTour(false)
+      }
+      
       setCurrentLevel(levelId)
       navigate(`/level/${levelId}`)
     }
@@ -462,7 +507,80 @@ const Map = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Fondo limpio sin estrellas animadas */}
+      {/* Fondo espacial con nebulosas y estrellas */}
+      <div className="absolute inset-0 pointer-events-none">
+  {/* Nebulosas eliminadas, solo estrellas y meteoritos */}
+        
+        {/* Estrellas animadas */}
+        {backgroundStars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute bg-white rounded-full"
+            style={{
+              width: star.size + 'px',
+              height: star.size + 'px',
+              left: star.left + '%',
+              top: star.top + '%',
+              animation: `twinkle ${star.duration}s infinite`,
+              animationDelay: star.delay + 's'
+            }}
+          />
+        ))}
+
+        {/* Meteoritos */}
+        {meteorites.map((meteorite) => (
+          <div
+            key={meteorite.id}
+            className="absolute bg-gradient-to-r from-yellow-300 to-orange-500 rounded-full opacity-80"
+            style={{
+              width: meteorite.size + 'px',
+              height: meteorite.size + 'px',
+              left: meteorite.startX + '%',
+              top: meteorite.startY + '%',
+              animation: `meteorite-fall ${meteorite.duration}s linear forwards`,
+              boxShadow: '0 0 8px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 215, 0, 0.6)'
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Estilos CSS para animaciones */}
+      <style>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        @keyframes nebula-drift {
+          0% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(50px, -30px) scale(1.1); }
+          50% { transform: translate(-30px, 50px) scale(0.9); }
+          75% { transform: translate(-50px, -20px) scale(1.05); }
+          100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes meteorite-fall {
+          0% {
+            transform: translate(0, 0) rotate(-45deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translate(100vw, 100vh) rotate(-45deg);
+            opacity: 0;
+          }
+        }
+      `}</style>
 
       {/* Sidebar with Player Stats */}
       <motion.div 
