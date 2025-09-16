@@ -122,13 +122,14 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
   }, []);
 
   const handleDefinitionClick = (definitionId) => {
-  if (matchedPairs.has(definitionId)) return
-  // Bloquear si hay feedback mostrándose
-  if (showFeedback) return
-  // Si ya hay una definición seleccionada, no permitir seleccionar otra
-  if (selectedDefinition !== null) return
-  setSelectedDefinition(definitionId)
-  setFlippedCards(prev => new Set(Array.from(prev).concat(`def-${definitionId}`)))
+    if (matchedPairs.has(definitionId)) return
+    if (showFeedback) return
+    if (selectedDefinition !== null) return
+    setSelectedDefinition(definitionId)
+    setFlippedCards(prev => new Set(Array.from(prev).concat(`def-${definitionId}`)))
+    if (selectedPolicy !== null) {
+      checkMatch(definitionId, selectedPolicy)
+    }
   }
 
   const handlePolicyClick = (policyId) => {

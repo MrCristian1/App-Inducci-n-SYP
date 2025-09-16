@@ -29,7 +29,7 @@ const stepsData = [
 
 const initialState = {
   dragAnswers: {},
-  slider: 2,
+  slider: 7,
   orderSteps: [],
   fillText: ['', '', ''],
   analysisText: '',
@@ -46,6 +46,7 @@ const shuffledSteps = [stepsData[2], stepsData[0], stepsData[1]];
 
 const AccidentQuiz = ({ onClose }) => {
   const [state, setState] = useState(initialState);
+  const [showSliderError, setShowSliderError] = useState(false);
   const navigate = useNavigate();
   const [showRetryModal, setShowRetryModal] = useState(false);
   const [showOrderError, setShowOrderError] = useState(false);
@@ -112,14 +113,22 @@ const AccidentQuiz = ({ onClose }) => {
     setShowRetryModal(false);
   };
   const changeQuestion = (dir) => {
-    // Si estamos en la sección de arrastrar y se va a avanzar
+    // Validación para sección de arrastrar
     if (state.current === 0 && dir === 1) {
-      // Verificar si hay algún error
       const allAnswered = Object.keys(state.dragAnswers).length === dragItems.length;
       const anyWrong = dragItems.some(item => state.dragAnswers[item.id] && state.dragAnswers[item.id] !== item.category);
       if (allAnswered && anyWrong) {
         setShowRetryModal(true);
         return;
+      }
+    }
+    // Validación para slider
+    if (state.current === 1 && dir === 1) {
+      if (state.slider !== 2) {
+        setShowSliderError(true);
+        return;
+      } else {
+        setShowSliderError(false);
       }
     }
     setState(s => ({ ...s, current: Math.max(0, Math.min(totalQuestions - 1, s.current + dir)) }));
@@ -168,7 +177,7 @@ const AccidentQuiz = ({ onClose }) => {
         // Drag & Drop
         return (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} {...{ className: "fade-in" }}>
-            <h3 className="font-bold text-xl mb-4 text-blue-200 drop-shadow text-center">Arrastra cada riesgo a su categoría correspondiente</h3>
+            <h3 className="font-bold text-xl text-blue-200 drop-shadow text-center">Arrastra cada riesgo a su categoría correspondiente</h3>
             <div className="flex flex-col md:flex-row gap-8 justify-center items-start">
               {/* Draggables */}
               <div className="flex flex-col gap-4 w-80 md:w-80">
@@ -212,8 +221,8 @@ const AccidentQuiz = ({ onClose }) => {
               </div>
             </div>
             <div className="flex justify-center gap-6 mt-8">
-              <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-blue-200 shadow" disabled>Anterior</button>
-              <button className={`bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-blue-200 ${Object.keys(state.dragAnswers).length !== dragItems.length ? 'opacity-50' : 'hover:scale-105'}`} onClick={() => changeQuestion(1)} disabled={Object.keys(state.dragAnswers).length !== dragItems.length}>Siguiente</button>
+              <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-blue-200 shadow opacity-50 cursor-not-allowed" disabled>Anterior</button>
+              <button className={`bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-blue-200 transition-all duration-300 ${Object.keys(state.dragAnswers).length !== dragItems.length ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/25 hover:-translate-y-1'}`} onClick={() => changeQuestion(1)} disabled={Object.keys(state.dragAnswers).length !== dragItems.length}>Siguiente</button>
             </div>
             <div className="mt-4 text-sm text-green-400 font-bold">{Object.keys(state.dragAnswers).length === dragItems.length && '¡Todos los riesgos ubicados correctamente!'}</div>
           </motion.div>
@@ -245,8 +254,24 @@ const AccidentQuiz = ({ onClose }) => {
             </div>
             <div className="flex justify-center gap-6 mt-8">
               <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-purple-200 shadow" onClick={() => changeQuestion(-1)}>Anterior</button>
-              <button className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-purple-200 hover:scale-105" onClick={() => changeQuestion(1)}>Siguiente</button>
+              <button className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-purple-200 hover:scale-105" onClick={() => {
+                if (state.slider === 2) {
+                  setShowSliderError(false);
+                  changeQuestion(1);
+                } else {
+                  setShowSliderError(true);
+                }
+              }}>Siguiente</button>
             </div>
+            {showSliderError && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="bg-white/30 backdrop-blur-lg border border-purple-200 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center">
+                  <h4 className="text-2xl font-bold text-white mb-4 drop-shadow">¡Respuesta incorrecta!</h4>
+                  <p className="text-white mb-6 text-center font-semibold">El tiempo máximo para reportar un accidente de trabajo es <span className='text-purple-300 font-bold'>2 días hábiles</span>.</p>
+                  <button className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-2 rounded-xl font-bold shadow-lg border border-purple-200 hover:scale-105 transition" onClick={() => setShowSliderError(false)}>Entendido</button>
+                </div>
+              </div>
+            )}
           </motion.div>
         );
       case 2:
@@ -390,16 +415,75 @@ const AccidentQuiz = ({ onClose }) => {
   return (
     <>
       {/* Header y barra de progreso */}
-      <div className="mb-8 mt-32">
-        <h2 className="text-3xl font-bold text-blue-200 mb-2 text-center drop-shadow">Quiz Interactivo de Seguridad Laboral</h2>
+      <div className="mb-8 mt-5">
+  <h2 className="text-5xl font-bold text-white mb-8 text-center drop-shadow">Quiz Interactivo de Seguridad Laboral</h2>
         <p className="text-lg text-blue-100 text-center mb-4">Pon a prueba tus conocimientos con diferentes tipos de preguntas</p>
         <div className="mx-auto w-2/3 max-w-xl h-3 bg-gradient-to-r from-blue-400/40 via-purple-400/40 to-blue-400/40 rounded-full mb-2 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5 }}
-            {...{ className: "h-full bg-blue-400/80 rounded-full" }}
-          />
+          <div className="progress-container relative w-full h-5 rounded-full overflow-hidden" style={{background: 'rgba(255,255,255,0.1)', height: '20px'}}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.8, ease: [0.65, 0, 0.35, 1] }}
+              style={{
+                width: `${progress}%`,
+                height: '100%',
+                borderRadius: '9999px',
+                background: 'linear-gradient(270deg, #7f9cf5, #a78bfa, #f472b6, #34d399, #7f9cf5)',
+                backgroundSize: '400% 400%',
+                animation: 'gradientIdle 4s ease infinite, pulseGlow 3s ease-in-out infinite',
+                position: 'relative',
+                boxShadow: '0 0 10px rgba(167, 139, 250, 0.6)',
+                transition: 'width 0.8s cubic-bezier(0.65, 0, 0.35, 1)',
+              }}
+              className="progress-bar"
+            >
+              <div className="progress-shine" style={{position:'absolute',top:0,bottom:0,width:'20%',left:0,background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)',animation:'shimmer 2.5s infinite'}}></div>
+              <div className="progress-percentage" style={{position:'absolute',right:10,top:'50%',transform:'translateY(-70%)',color:'white',fontWeight:'bold',fontSize:'12px',textShadow:'0 0 3px rgba(0,0,0,0.8)',zIndex:20}}>{Math.round(progress)}%</div>
+            </motion.div>
+            {/* Marcadores de progreso */}
+            <div className="progress-mark" style={{left:'25%'}}></div>
+            <div className="progress-mark" style={{left:'50%'}}></div>
+            <div className="progress-mark" style={{left:'75%'}}></div>
+            {/* Partículas */}
+            <div className="particle" style={{width:'3px',height:'3px',left:'15%',top:'4px',animationDelay:'0.5s'}}></div>
+            <div className="particle" style={{width:'4px',height:'4px',left:'40%',top:'10px',animationDelay:'1.2s'}}></div>
+            <div className="particle" style={{width:'2px',height:'2px',left:'60%',top:'2px',animationDelay:'0.8s'}}></div>
+            <div className="particle" style={{width:'3px',height:'3px',left:'80%',top:'8px',animationDelay:'1.5s'}}></div>
+            <style>{`
+              @keyframes gradientIdle {
+                0% {background-position:0% 50%}
+                50% {background-position:100% 50%}
+                100% {background-position:0% 50%}
+              }
+              @keyframes shimmer {
+                0% {left: -100%}
+                100% {left: 100%}
+              }
+              @keyframes float {
+                0%, 100% {transform: translateY(0);}
+                50% {transform: translateY(-2px);}
+              }
+              @keyframes pulseGlow {
+                0%, 100% {box-shadow: 0 0 10px rgba(167, 139, 250, 0.6);}
+                50% {box-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 0 30px rgba(167, 139, 250, 0.4);}
+              }
+              .progress-bar {animation: gradientIdle 4s ease infinite, pulseGlow 3s ease-in-out infinite;}
+              .progress-shine {animation: shimmer 2.5s infinite;}
+              .particle {animation: float 3s infinite ease-in-out;}
+              .progress-mark {
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background: white;
+                border-radius: 50%;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 10;
+                box-shadow: 0 0 5px rgba(255,255,255,0.8);
+                animation: pulseGlow 2s infinite;
+              }
+            `}</style>
+          </div>
         </div>
         <div className="w-full flex justify-center">
           <span className="text-sm text-blue-200 font-bold mt-2">{state.current + 1} / {totalQuestions}</span>
@@ -409,13 +493,64 @@ const AccidentQuiz = ({ onClose }) => {
       <div className="space-y-6">
         {/* Modal de reintento */}
         {showRetryModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="bg-white/30 backdrop-blur-lg border border-blue-200 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center">
-              <h4 className="text-2xl font-bold text-white mb-4 drop-shadow">¡Ups! Hay errores</h4>
-              <p className="text-white mb-6 text-center font-semibold">Algunos riesgos no están en la categoría correcta.<br />¿Quieres intentarlo de nuevo?</p>
-              <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-2 rounded-xl font-bold shadow-lg border border-blue-200 hover:scale-105 transition" onClick={resetDragSection}>Reintentar</button>
-            </div>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.7, opacity: 0, y: 50 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.7, opacity: 0, y: 50 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              className="bg-gradient-to-br from-red-500/20 to-pink-500/20 backdrop-blur-xl border-2 border-red-300/50 rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 relative overflow-hidden"
+            >
+              {/* Efecto de brillo animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse"></div>
+              
+              {/* Icono de error animado */}
+              <motion.div 
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: "spring", bounce: 0.5 }}
+                className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center"
+              >
+                <span className="text-4xl">❌</span>
+              </motion.div>
+              
+              <motion.h4 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold text-white mb-4 drop-shadow-lg text-center"
+              >
+                ¡Ups! Hay errores
+              </motion.h4>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-white mb-6 text-center font-semibold leading-relaxed"
+              >
+                Algunos riesgos no están en la categoría correcta.<br />
+                <span className="text-yellow-300">¿Quieres intentarlo de nuevo?</span>
+              </motion.p>
+              
+              <motion.button 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, type: "spring", bounce: 0.4 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.4)" }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg border border-red-300/50 transition-all duration-300"
+                onClick={resetDragSection}
+              >
+                🔄 Reintentar
+              </motion.button>
+            </motion.div>
+          </motion.div>
         )}
         {/* Drag & Drop */
           state.current === 0 && (
@@ -492,12 +627,74 @@ const AccidentQuiz = ({ onClose }) => {
                   }}
                 />
               </div>
-              <span className="text-2xl font-bold text-purple-400 mt-2 drop-shadow">{state.slider} días hábiles</span>
+              <span className="text-2xl font-bold text-purple-400 mt-20 drop-shadow">{state.slider} días hábiles</span>
             </div>
             <div className="flex justify-center gap-6 mt-8">
-              <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-purple-200 shadow" onClick={() => changeQuestion(-1)}>Anterior</button>
-              <button className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-purple-200 hover:scale-105" onClick={() => changeQuestion(1)}>Siguiente</button>
+              <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-purple-200 shadow transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/25 hover:-translate-y-1 hover:bg-white/40" onClick={() => changeQuestion(-1)}>Anterior</button>
+              <button className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-purple-200 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/25 hover:-translate-y-1" onClick={() => changeQuestion(1)}>Siguiente</button>
             </div>
+            {/* Modal de error para slider */}
+            {showSliderError && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+              >
+                <motion.div 
+                  initial={{ scale: 0.7, opacity: 0, rotateY: 90 }} 
+                  animate={{ scale: 1, opacity: 1, rotateY: 0 }} 
+                  exit={{ scale: 0.7, opacity: 0, rotateY: -90 }}
+                  transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+                  className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-xl border-2 border-purple-300/50 rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 relative overflow-hidden"
+                >
+                  {/* Partículas flotantes */}
+                  <div className="absolute top-4 left-4 w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                  <div className="absolute top-8 right-6 w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-pink-400 rounded-full animate-ping"></div>
+                  
+                  {/* Icono de reloj animado */}
+                  <motion.div 
+                    initial={{ scale: 0, rotate: -360 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: "spring", bounce: 0.6 }}
+                    className="w-16 h-16 mx-auto mb-4 bg-purple-500/20 rounded-full flex items-center justify-center"
+                  >
+                    <span className="text-4xl">⏰</span>
+                  </motion.div>
+                  
+                  <motion.h4 
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3, type: "spring" }}
+                    className="text-2xl font-bold text-white mb-4 drop-shadow-lg text-center"
+                  >
+                    ¡Respuesta incorrecta!
+                  </motion.h4>
+                  
+                  <motion.p 
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4, type: "spring" }}
+                    className="text-white mb-6 text-center font-semibold leading-relaxed"
+                  >
+                    El tiempo máximo para reportar un accidente de trabajo es <span className='text-purple-300 font-bold text-lg'>2 días hábiles</span>.
+                  </motion.p>
+                  
+                  <motion.button 
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, type: "spring", bounce: 0.4 }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(147, 51, 234, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg border border-purple-300/50 transition-all duration-300"
+                    onClick={() => setShowSliderError(false)}
+                  >
+                    ✅ Entendido
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            )}
           </motion.div>
         )}
         {/* Escenario interactivo */}
@@ -560,13 +757,76 @@ const AccidentQuiz = ({ onClose }) => {
             </div>
             {/* Modal de error de orden */}
             {showOrderError && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="bg-white/30 backdrop-blur-lg border border-orange-200 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center">
-                  <h4 className="text-2xl font-bold text-white mb-4 drop-shadow">¡Orden incorrecto!</h4>
-                  <p className="text-white mb-6 text-center font-semibold">El orden de los pasos no es correcto.<br />Intenta de nuevo.</p>
-                  <button className="bg-gradient-to-r from-orange-400 to-orange-600 text-white px-8 py-2 rounded-xl font-bold shadow-lg border border-orange-200 hover:scale-105 transition" onClick={() => setShowOrderError(false)}>Reintentar</button>
-                </div>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+              >
+                <motion.div 
+                  initial={{ scale: 0.3, opacity: 0, rotate: -180 }} 
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }} 
+                  exit={{ scale: 0.3, opacity: 0, rotate: 180 }}
+                  transition={{ type: "spring", duration: 0.7, bounce: 0.4 }}
+                  className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl border-2 border-orange-300/50 rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 relative overflow-hidden"
+                >
+                  {/* Efectos de fondo */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/5 rounded-3xl"></div>
+                  <div className="absolute top-2 right-2 w-3 h-3 bg-orange-400 rounded-full animate-bounce delay-75"></div>
+                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-red-400 rounded-full animate-pulse delay-150"></div>
+                  <div className="absolute top-1/2 right-4 w-1 h-1 bg-yellow-400 rounded-full animate-ping delay-300"></div>
+                  
+                  {/* Icono de orden incorrecto */}
+                  <motion.div 
+                    initial={{ scale: 0, rotateY: -180 }}
+                    animate={{ scale: 1, rotateY: 0 }}
+                    transition={{ delay: 0.3, type: "spring", bounce: 0.6 }}
+                    className="w-16 h-16 mx-auto mb-4 bg-orange-500/20 rounded-full flex items-center justify-center relative"
+                  >
+                    <motion.span 
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                      className="text-4xl"
+                    >
+                      🔄
+                    </motion.span>
+                  </motion.div>
+                  
+                  <motion.h4 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4, type: "spring" }}
+                    className="text-2xl font-bold text-white mb-4 drop-shadow-lg text-center"
+                  >
+                    ¡Orden incorrecto!
+                  </motion.h4>
+                  
+                  <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, type: "spring" }}
+                    className="text-white mb-6 text-center font-semibold leading-relaxed"
+                  >
+                    El orden de los pasos no es correcto.<br />
+                    <span className="text-orange-300 font-bold">¡Intenta de nuevo!</span>
+                  </motion.p>
+                  
+                  <motion.button 
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6, type: "spring", bounce: 0.5 }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(249, 115, 22, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg border border-orange-300/50 transition-all duration-300"
+                    onClick={() => {
+                      setShowOrderError(false);
+                      setState(s => ({ ...s, stepClicks: [] }));
+                    }}
+                  >
+                    🔄 Reintentar
+                  </motion.button>
+                </motion.div>
+              </motion.div>
             )}
           </motion.div>
         )}
@@ -593,9 +853,9 @@ const AccidentQuiz = ({ onClose }) => {
                 </div>
               </div>
               <div className="flex justify-center gap-6 mt-8">
-                <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-blue-200 shadow" onClick={() => changeQuestion(-1)}>Anterior</button>
+                <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-blue-200 shadow transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/25 hover:-translate-y-1 hover:bg-white/40" onClick={() => changeQuestion(-1)}>Anterior</button>
                 <button
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-blue-200 hover:scale-105"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-blue-200 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/25 hover:-translate-y-1"
                   onClick={() => {
                     const correctFill = ['lesión', 'trabajador', 'trabajo'];
                     const isFillCorrect =
@@ -614,13 +874,76 @@ const AccidentQuiz = ({ onClose }) => {
                 </button>
                 {/* Modal de error de definición */}
                 {showFillError && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white/30 backdrop-blur-lg border border-blue-200 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center">
-                      <h4 className="text-2xl font-bold text-white mb-4 drop-shadow">¡Respuesta incorrecta!</h4>
-                      <p className="text-white mb-6 text-center font-semibold">La definición no es correcta.<br />Verifica el orden y las palabras.</p>
-                      <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-2 rounded-xl font-bold shadow-lg border border-blue-200 hover:scale-105 transition" onClick={() => setShowFillError(false)}>Reintentar</button>
-                    </div>
-                  </div>
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+                  >
+                    <motion.div 
+                      initial={{ scale: 0.5, opacity: 0, rotateX: 90 }} 
+                      animate={{ scale: 1, opacity: 1, rotateX: 0 }} 
+                      exit={{ scale: 0.5, opacity: 0, rotateX: -90 }}
+                      transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+                      className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-xl border-2 border-blue-300/50 rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 relative overflow-hidden"
+                    >
+                      {/* Efectos de cristal */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-transparent to-purple-500/10 rounded-3xl"></div>
+                      <div className="absolute top-3 left-3 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                      <div className="absolute bottom-3 right-3 w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></div>
+                      <div className="absolute top-1/3 right-5 w-1 h-1 bg-indigo-400 rounded-full animate-ping"></div>
+                      
+                      {/* Icono de texto incorrecto */}
+                      <motion.div 
+                        initial={{ scale: 0, rotateZ: -90 }}
+                        animate={{ scale: 1, rotateZ: 0 }}
+                        transition={{ delay: 0.2, type: "spring", bounce: 0.5 }}
+                        className="w-16 h-16 mx-auto mb-4 bg-blue-500/20 rounded-full flex items-center justify-center"
+                      >
+                        <motion.span 
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                          className="text-4xl"
+                        >
+                          📝
+                        </motion.span>
+                      </motion.div>
+                      
+                      <motion.h4 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, type: "spring" }}
+                        className="text-2xl font-bold text-white mb-4 drop-shadow-lg text-center"
+                      >
+                        ¡Respuesta incorrecta!
+                      </motion.h4>
+                      
+                      <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4, type: "spring" }}
+                        className="text-white mb-6 text-center font-semibold leading-relaxed"
+                      >
+                        La definición no es correcta.<br />
+                        <span className="text-blue-300 font-bold">Verifica el orden y las palabras.</span>
+                      </motion.p>
+                      
+                      <motion.button 
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5, type: "spring", bounce: 0.4 }}
+                        whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg border border-blue-300/50 transition-all duration-300"
+                        onClick={() => {
+                          setShowFillError(false);
+                          setState(s => ({ ...s, fillText: ['', '', ''] }));
+                        }}
+                      >
+                        📖 Reintentar
+                      </motion.button>
+                    </motion.div>
+                  </motion.div>
                 )}
               </div>
             </div>
@@ -638,8 +961,8 @@ const AccidentQuiz = ({ onClose }) => {
               <textarea value={state.analysisText} onChange={e => setState(s => ({ ...s, analysisText: e.target.value }))} className="h-32 border border-blue-200 bg-white/40 backdrop-blur-md rounded-xl p-4 mb-4 text-white font-bold shadow max-w-2xl w-full" placeholder="Escribe tu análisis aquí..." />
             </div>
             <div className="flex justify-center gap-6 mt-8">
-              <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-blue-200 shadow" onClick={() => changeQuestion(-1)}>Anterior</button>
-              <button className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-green-200 hover:scale-105" onClick={() => {
+              <button className="bg-white/30 backdrop-blur-md text-white px-6 py-2 rounded-xl font-bold border border-blue-200 shadow transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/25 hover:-translate-y-1 hover:bg-white/40" onClick={() => changeQuestion(-1)}>Anterior</button>
+              <button className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-green-200 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25 hover:-translate-y-1" onClick={() => {
                 const wordCount = state.analysisText.trim().split(/\s+/).filter(Boolean).length;
                 if (wordCount < 5) {
                   setShowFillError(true);
@@ -652,13 +975,82 @@ const AccidentQuiz = ({ onClose }) => {
             </div>
             {/* Modal de error de análisis corto */}
             {showFillError && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="bg-white/30 backdrop-blur-lg border border-blue-200 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center">
-                  <h4 className="text-2xl font-bold text-white mb-4 drop-shadow">¡Tú análisis es muy corto!</h4>
-                  <p className="text-white mb-6 text-center font-semibold">Por favor escribe al menos 5 palabras en tu análisis.</p>
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-2 rounded-xl font-bold shadow-lg border border-blue-200 hover:scale-105 transition" onClick={() => setShowFillError(false)}>Reintentar</button>
-                </div>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+              >
+                <motion.div 
+                  initial={{ scale: 0.6, opacity: 0, rotateY: 180 }} 
+                  animate={{ scale: 1, opacity: 1, rotateY: 0 }} 
+                  exit={{ scale: 0.6, opacity: 0, rotateY: -180 }}
+                  transition={{ type: "spring", duration: 0.7, bounce: 0.4 }}
+                  className="bg-gradient-to-br from-green-500/20 to-blue-500/20 backdrop-blur-xl border-2 border-green-300/50 rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 relative overflow-hidden"
+                >
+                  {/* Decoraciones */}
+                  <div className="absolute inset-0 bg-gradient-to-bl from-green-500/5 via-transparent to-blue-500/5 rounded-3xl"></div>
+                  <div className="absolute top-4 left-6 w-2.5 h-2.5 bg-green-400 rounded-full animate-bounce"></div>
+                  <div className="absolute bottom-6 right-4 w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse delay-100"></div>
+                  <div className="absolute top-1/4 left-4 w-1 h-1 bg-emerald-400 rounded-full animate-ping delay-200"></div>
+                  
+                  {/* Icono de análisis corto */}
+                  <motion.div 
+                    initial={{ scale: 0, rotate: 45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: "spring", bounce: 0.6 }}
+                    className="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center"
+                  >
+                    <motion.span 
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 5, -5, 0] 
+                      }}
+                      transition={{ 
+                        repeat: Infinity, 
+                        duration: 2, 
+                        ease: "easeInOut" 
+                      }}
+                      className="text-4xl"
+                    >
+                      ✍️
+                    </motion.span>
+                  </motion.div>
+                  
+                  <motion.h4 
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3, type: "spring" }}
+                    className="text-2xl font-bold text-white mb-4 drop-shadow-lg text-center"
+                  >
+                    ¡Tu análisis es muy corto!
+                  </motion.h4>
+                  
+                  <motion.p 
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4, type: "spring" }}
+                    className="text-white mb-6 text-center font-semibold leading-relaxed"
+                  >
+                    Por favor escribe <span className="text-green-300 font-bold">al menos 5 palabras</span> en tu análisis.
+                  </motion.p>
+                  
+                  <motion.button 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, type: "spring", bounce: 0.4 }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(34, 197, 94, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg border border-green-300/50 transition-all duration-300"
+                    onClick={() => {
+                      setShowFillError(false);
+                      setState(s => ({ ...s, analysisText: '' }));
+                    }}
+                  >
+                    ✏️ Reintentar
+                  </motion.button>
+                </motion.div>
+              </motion.div>
             )}
           </motion.div>
 
@@ -668,8 +1060,8 @@ const AccidentQuiz = ({ onClose }) => {
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} {...{ className: "fade-in" }}>
             <h3 className="font-bold text-2xl mb-4 text-green-300 drop-shadow">¡Quiz completado!</h3>
             <p className="mb-6 text-blue-100">Tu puntaje: <span className="font-bold text-green-400">{state.score}/5</span> ({Math.round((state.score / totalQuestions) * 100)}%)</p>
-            <button className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-green-200 hover:scale-105" onClick={restartQuiz}>Reiniciar Quiz</button>
-            <button className="ml-4 bg-white/30 backdrop-blur-md text-blue-900 px-6 py-2 rounded-xl font-bold border border-blue-200 shadow" onClick={onClose}>Cerrar</button>
+            <button className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-6 py-2 rounded-xl font-bold shadow-lg border border-green-200 transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25 hover:-translate-y-1" onClick={restartQuiz}>Reiniciar Quiz</button>
+            <button className="ml-4 bg-white/30 backdrop-blur-md text-blue-900 px-6 py-2 rounded-xl font-bold border border-blue-200 shadow transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/25 hover:-translate-y-1 hover:bg-white/40" onClick={onClose}>Cerrar</button>
           </motion.div>
         )}
       </div>

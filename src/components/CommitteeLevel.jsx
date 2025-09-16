@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppContext } from '../context/AppContext';
 import { 
   faClipboardCheck, faSearch, faLightbulb, 
   faShieldAlt, faUsers, faComments, faHandshake, faStar, 
-  faMedal, faIdCard, faBuilding, faArrowLeft
+  faMedal, faIdCard, faBuilding, faArrowLeft, faUserTie,
+  faCheckCircle, faTimesCircle, faTrophy, faRedo
 } from '@fortawesome/free-solid-svg-icons';
 
 const committees = [
   {
+    id: 'COPASST',
     name: 'COPASST',
     period: '2024 – 2026',
     description: 'Comité Paritario de Seguridad y Salud en el Trabajo',
+    color: 'purple',
     members: {
       workers: [
         { name: 'Tatiana Chavarro', img: '../../../img/Tatiana.png' },
@@ -36,9 +39,11 @@ const committees = [
     ],
   },
   {
+    id: 'CCL',
     name: 'CCL',
     period: '2024 – 2026',
     description: 'Comité de Convivencia Laboral',
+    color: 'blue',
     members: {
       workers: [
         { name: 'Giovanna Gio', img: '../../../img/Giovanna.png' },
@@ -64,6 +69,7 @@ const committees = [
 
 const quizQuestions = [
   {
+    id: 1,
     type: 'case',
     question: 'Un trabajador ha reportado que está siendo objeto de burlas y comentarios despectivos por parte de sus compañeros de trabajo de manera constante.',
     options: [
@@ -74,6 +80,7 @@ const quizQuestions = [
     explanation: 'Este es un caso que debe ser manejado por el CCL, ya que involucra una situación que podría constituir acoso laboral. El CCL es el encargado de examinar confidencialmente los casos relacionados con la convivencia y el acoso laboral.'
   },
   {
+    id: 2,
     type: 'case',
     question: 'Se ha presentado un incidente en el área de producción donde un equipo ha presentado fallas que podrían poner en riesgo la seguridad de los trabajadores.',
     options: [
@@ -84,6 +91,7 @@ const quizQuestions = [
     explanation: 'Este caso corresponde al COPASST, ya que está relacionado con la seguridad en el trabajo y la prevención de accidentes. El COPASST debe investigar y proponer medidas para mantener ambientes de trabajo seguros.'
   },
   {
+    id: 3,
     type: 'dragdrop',
     question: 'Arrastra cada integrante al comité al que pertenece',
     members: [
@@ -105,23 +113,35 @@ const sectionTabs = [
 ];
 
 const StarField = () => {
-  const [stars] = useState(Array(50).fill().map((_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-    delay: Math.random() * 2,
-  })));
+  const stars = useMemo(() => 
+    Array(50).fill().map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      delay: Math.random() * 2,
+      size: Math.random() * 3 + 1,
+    })), []
+  );
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {stars.map((star) => (
-        <div
+        <motion.div
           key={star.id}
-          className="absolute w-1 h-1 bg-white rounded-full opacity-60 animate-star-twinkle"
+          className="absolute bg-white rounded-full opacity-60"
           style={{
             left: `${star.left}%`,
             top: `${star.top}%`,
-            animationDelay: `${star.delay}s`,
+            width: `${star.size}px`,
+            height: `${star.size}px`,
+          }}
+          animate={{
+            opacity: [0.3, 0.8, 0.3],
+          }}
+          transition={{
+            duration: 2 + Math.random() * 2,
+            repeat: Infinity,
+            delay: star.delay,
           }}
         />
       ))}
@@ -129,395 +149,715 @@ const StarField = () => {
   );
 };
 
-const CommitteeLevel = ({ onComplete }) => {
-  const navigate = useNavigate();
-  const { completeLevel } = useAppContext();
-  const [section, setSection] = useState('members');
-  const [quizIndex, setQuizIndex] = useState(0);
+const CommitteeCard = ({ committee, section }) => {
+  const colorMap = {
+    purple: {
+      bg: 'bg-purple-500/20',
+      text: 'text-purple-300',
+      border: 'border-purple-500/30',
+      icon: 'bg-purple-500/30'
+    },
+    blue: {
+      bg: 'bg-blue-500/20',
+      text: 'text-blue-300',
+      border: 'border-blue-500/30',
+      icon: 'bg-blue-500/30'
+    }
+  };
+
+  const colors = colorMap[committee.color] || colorMap.purple;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`flex-1 rounded-2xl p-6 shadow-xl backdrop-blur-lg border ${colors.border} ${colors.bg}`}
+    >
+      <h2 className="text-2xl font-bold mb-2">
+        <span className={colors.text}>{committee.name}</span>
+        <span className="text-white/60 text-base ml-2">{committee.period}</span>
+      </h2>
+      <p className="text-white/80 mb-6">{committee.description}</p>
+      
+      {section === 'members' && (
+        <div className="flex flex-col gap-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faUserTie} className={colors.text} />
+              <span className={colors.text}>Representantes de los trabajadores</span>
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {committee.members.workers.map((m, idx) => (
+                <motion.div
+                  key={m.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20">
+                    <img 
+                      src={m.img} 
+                      alt={m.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNCAwLTE2IDIuNjgtMTYgOHYyaDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
+                      }}
+                    />
+                  </div>
+                  <span className="text-white/90 text-sm text-center">{m.name}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faBuilding} className={colors.text} />
+              <span className={colors.text}>Representantes del empleador</span>
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {committee.members.employer.map((m, idx) => (
+                <motion.div
+                  key={m.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20">
+                    <img 
+                      src={m.img} 
+                      alt={m.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNCAwLTE2IDIuNjgtMTYgOHYyaDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
+                      }}
+                    />
+                  </div>
+                  <span className="text-white/90 text-sm text-center">{m.name}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {section === 'functions' && (
+        <div className="flex flex-col gap-4">
+          {committee.functions.map((f, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="flex items-start gap-4 bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors"
+            >
+              <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${colors.text} ${colors.icon}`}>
+                <FontAwesomeIcon icon={f.icon} size="sm" />
+              </div>
+              <p className="text-white/90 text-sm leading-relaxed">{f.text}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+const QuizQuestion = ({ 
+  question, 
+  onAnswer, 
+  onNext, 
+  currentIndex, 
+  totalQuestions,
+  score,
+  streak,
+  onDragDropComplete
+}) => {
   const [selected, setSelected] = useState(null);
-  const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [showResult, setShowResult] = useState(false);
+  const [isAnswered, setIsAnswered] = useState(false);
+
+  const handleSelect = (index) => {
+    if (isAnswered) return;
+    
+    setSelected(index);
+    setIsAnswered(true);
+    onAnswer(index);
+  };
+
+  const handleNext = () => {
+    setSelected(null);
+    setIsAnswered(false);
+    onNext();
+  };
+
+  return (
+    <motion.div
+      key={question.id}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="w-full"
+    >
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-white/70 text-sm">
+            Pregunta {currentIndex + 1} de {totalQuestions}
+          </span>
+          <div className="flex items-center gap-2">
+            {streak > 0 && (
+              <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded text-xs flex items-center gap-1">
+                <FontAwesomeIcon icon={faStar} size="xs" /> Racha: {streak}
+              </span>
+            )}
+            <span className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">
+              Puntos: {score}
+            </span>
+          </div>
+        </div>
+        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-purple-500 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+      </div>
+
+      <div className="bg-white/5 rounded-xl p-6 mb-6 border border-white/10">
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <span className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center text-purple-300">
+            {currentIndex + 1}
+          </span>
+          {question.question}
+        </h3>
+        
+        {question.type === 'case' ? (
+          <div className="space-y-3">
+            {question.options.map((opt, idx) => {
+              const isCorrect = opt.committee === question.answer;
+              const isSelectedOption = selected === idx;
+              
+              let buttonClass = "w-full text-left p-4 rounded-lg transition-all duration-200 ";
+              
+              if (isAnswered) {
+                if (isSelectedOption) {
+                  buttonClass += isCorrect 
+                    ? "bg-green-500/20 text-green-300 border border-green-500/30" 
+                    : "bg-red-500/20 text-red-300 border border-red-500/30";
+                } else if (isCorrect) {
+                  buttonClass += "bg-green-500/10 text-green-300 border border-green-500/20";
+                } else {
+                  buttonClass += "bg-white/5 text-white/50";
+                }
+              } else {
+                buttonClass += "bg-white/10 text-white/80 hover:bg-purple-500/20 hover:text-purple-300";
+              }
+              
+              return (
+                <motion.button
+                  key={idx}
+                  whileHover={{ scale: isAnswered ? 1 : 1.02 }}
+                  whileTap={{ scale: isAnswered ? 1 : 0.98 }}
+                  className={buttonClass}
+                  onClick={() => handleSelect(idx)}
+                  disabled={isAnswered}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-start">
+                      <span className="font-semibold">{opt.committee}</span>
+                      <span className="text-sm opacity-80 mt-1">{opt.text}</span>
+                    </div>
+                    {isAnswered && isSelectedOption && (
+                      <FontAwesomeIcon 
+                        icon={isCorrect ? faCheckCircle : faTimesCircle} 
+                        className={isCorrect ? "text-green-400" : "text-red-400"} 
+                      />
+                    )}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        ) : (
+          <DragDropQuestion 
+            question={question} 
+            onComplete={handleNext}
+            onDragDropComplete={onDragDropComplete}
+            isAnswered={isAnswered}
+          />
+        )}
+      </div>
+
+      {isAnswered && question.type === 'case' && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center text-purple-300 flex-shrink-0 mt-1">
+              <FontAwesomeIcon icon={faLightbulb} size="xs" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-1">Explicación</h4>
+              <p className="text-white/80 text-sm">{question.explanation}</p>
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium"
+              onClick={handleNext}
+            >
+              {currentIndex < totalQuestions - 1 ? 'Siguiente pregunta' : 'Ver resultados'}
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+const DragDropQuestion = ({ question, onComplete, isAnswered, onDragDropComplete }) => {
   const [droppedMembers, setDroppedMembers] = useState({
     COPASST: [],
     CCL: []
   });
 
-  const handleTab = (tab) => {
-    setSection(tab);
-  };
-
-  const handleSelect = (index) => {
-    if (selected !== null) return;
+  const handleDrop = (e, committee) => {
+    e.preventDefault();
+    const member = JSON.parse(e.dataTransfer.getData('member'));
     
-    setSelected(index);
-    const currentQuestion = quizQuestions[quizIndex];
-
-    if (currentQuestion.type === 'case') {
-      const isCorrect = currentQuestion.options[index].committee === currentQuestion.answer;
-      if (isCorrect) {
-        setStreak(streak + 1);
-        setScore(score + (100 + (streak * 20)));
-      } else {
-        setStreak(0);
-      }
-    }
-  };
-
-  const handleDrop = (member, committee) => {
-    if (quizQuestions[quizIndex].type !== 'dragdrop') return;
-
     // Evitar duplicados
     if (droppedMembers[committee].some(m => m.name === member.name)) return;
-
+    
     setDroppedMembers(prev => ({
       ...prev,
       [committee]: [...prev[committee], member]
     }));
-
-    const isCorrect = member.committee === committee;
-    if (isCorrect) {
-      setScore(score + 50);
-    }
   };
 
-  const handleRemoveMember = (memberName, committee) => {
+  const handleDragStart = (e, member) => {
+    e.dataTransfer.setData('member', JSON.stringify(member));
+  };
+
+  const handleRemove = (memberName, committee) => {
     setDroppedMembers(prev => ({
       ...prev,
       [committee]: prev[committee].filter(m => m.name !== memberName)
     }));
   };
 
-  const handleSubmit = () => {
-    if (quizIndex < quizQuestions.length - 1) {
-      setQuizIndex(quizIndex + 1);
-      setSelected(null);
-      if (quizQuestions[quizIndex + 1].type === 'dragdrop') {
-        setDroppedMembers({ COPASST: [], CCL: [] });
-      }
-    } else {
-      if (score >= 300) {
-        // Si alcanzó el puntaje mínimo, completar el nivel y redirigir al achievement
-        completeLevel(5);
-        setTimeout(() => {
-          onComplete();
-          navigate('/achievement/5');
-        }, 300);
-      } else {
-        setShowResult(true);
-        setSection('result');
-      }
+  const remainingMembers = question.members.filter(member => 
+    !Object.values(droppedMembers).flat().some(m => m.name === member.name)
+  );
+
+  const isComplete = remainingMembers.length === 0;
+
+  const handleContinue = () => {
+    // Calcular puntos antes de continuar
+    if (onDragDropComplete) {
+      onDragDropComplete(droppedMembers);
     }
+    onComplete();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {question.committees.map(committee => {
+          const committeeData = committees.find(c => c.id === committee);
+          const colorMap = {
+            COPASST: 'purple',
+            CCL: 'blue'
+          };
+          const colors = colorMap[committee] || 'purple';
+          
+          return (
+            <div 
+              key={committee}
+              className={`bg-white/5 rounded-lg p-4 border border-${colors}-500/20`}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => handleDrop(e, committee)}
+            >
+              <h4 className={`font-semibold text-${colors}-300 mb-3 flex items-center gap-2`}>
+                <FontAwesomeIcon icon={faBuilding} />
+                {committeeData.name}
+              </h4>
+              
+              <div className="min-h-[120px] space-y-2">
+                {droppedMembers[committee].map(member => (
+                  <div
+                    key={member.name}
+                    className={`flex items-center gap-2 p-2 rounded bg-${colors}-500/20 text-white text-sm`}
+                  >
+                    <div className="w-6 h-6 rounded-full overflow-hidden">
+                      <img 
+                        src={member.img} 
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNCAwLTE2IDIuNjgtMTYgOHYyaDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
+                        }}
+                      />
+                    </div>
+                    <span className="flex-1">{member.name}</span>
+                    <button 
+                      onClick={() => handleRemove(member.name, committee)}
+                      className="text-white/50 hover:text-white"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div>
+        <h4 className="text-white/80 text-sm mb-2">Arrastra los miembros disponibles:</h4>
+        <div className="flex flex-wrap gap-2">
+          {remainingMembers.map(member => (
+            <div
+              key={member.name}
+              draggable
+              onDragStart={e => handleDragStart(e, member)}
+              className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded text-white text-sm cursor-move hover:bg-white/20"
+            >
+              <div className="w-6 h-6 rounded-full overflow-hidden">
+                <img 
+                  src={member.img} 
+                  alt={member.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNGEgMC0xNiAyLjY4LTE2IDh2aDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
+                  }}
+                />
+              </div>
+              {member.name}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {isComplete && !isAnswered && (
+        <div className="flex justify-end">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium"
+            onClick={handleContinue}
+          >
+            Continuar
+          </motion.button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ResultsScreen = ({ score, onRetry, onComplete }) => {
+  const medalLevel = score >= 400 ? 'gold' : score >= 300 ? 'silver' : 'bronze';
+  const medalConfig = {
+    gold: { color: 'text-yellow-300', icon: faTrophy, label: 'Oro' },
+    silver: { color: 'text-gray-300', icon: faMedal, label: 'Plata' },
+    bronze: { color: 'text-amber-700', icon: faMedal, label: 'Bronce' }
+  };
+  const { color, icon, label } = medalConfig[medalLevel];
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl text-center max-w-md mx-auto"
+    >
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        className={`text-5xl mb-4 ${color}`}
+      >
+        <FontAwesomeIcon icon={icon} />
+      </motion.div>
+      
+      <h2 className="text-2xl font-bold text-white mb-2">¡Quiz Completado!</h2>
+      <p className="text-white/80 mb-6">Tu puntuación final</p>
+      
+      <div className="text-4xl font-bold text-purple-300 mb-6">{score} puntos</div>
+      
+      <p className="text-white/70 mb-2">
+        {medalLevel === 'gold' 
+          ? '¡Excelente! Dominas completamente los comités.' 
+          : medalLevel === 'silver' 
+          ? '¡Buen trabajo! Has pasado el quiz satisfactoriamente.'
+          : 'Sigue practicando para mejorar tu conocimiento.'
+        }
+      </p>
+      
+      <p className="text-white/60 text-sm mb-6">
+        Puntuación mínima requerida: <span className="text-purple-300">300 puntos</span>
+      </p>
+      
+      <div className="flex flex-col gap-3">
+        {score >= 300 ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-purple-500 text-white rounded-xl font-bold shadow-md"
+            onClick={onComplete}
+          >
+            Completar Nivel
+          </motion.button>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-blue-500 text-white rounded-xl font-bold shadow-md flex items-center justify-center gap-2"
+            onClick={onRetry}
+          >
+            <FontAwesomeIcon icon={faRedo} />
+            Intentar de nuevo
+          </motion.button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+const CommitteeLevel = ({ onComplete }) => {
+  const navigate = useNavigate();
+  const { completeLevel } = useAppContext();
+  const [activeSection, setActiveSection] = useState('members');
+  const [quizState, setQuizState] = useState({
+    index: 0,
+    score: 0,
+    streak: 0,
+    showResults: false
+  });
+
+  const handleAnswer = (answerIndex) => {
+    const currentQuestion = quizQuestions[quizState.index];
+    if (currentQuestion.type !== 'case') return;
+    
+    const isCorrect = currentQuestion.options[answerIndex].committee === currentQuestion.answer;
+    
+    setQuizState(prev => ({
+      ...prev,
+      score: prev.score + (isCorrect ? (100 + (prev.streak * 20)) : 0),
+      streak: isCorrect ? prev.streak + 1 : 0
+    }));
+  };
+
+  const handleDragDropComplete = (droppedMembers) => {
+    const currentQuestion = quizQuestions[quizState.index];
+    if (currentQuestion.type !== 'dragdrop') return;
+    
+    // Verificar si todos los miembros están en los comités correctos
+    let correctPlacements = 0;
+    let totalMembers = currentQuestion.members.length;
+    
+    currentQuestion.members.forEach(member => {
+      const correctCommittee = member.committee;
+      const isCorrectlyPlaced = droppedMembers[correctCommittee] && 
+        droppedMembers[correctCommittee].some(m => m.name === member.name);
+      
+      if (isCorrectlyPlaced) {
+        correctPlacements++;
+      }
+    });
+    
+    // Calcular puntos basado en el porcentaje de aciertos
+    const accuracy = correctPlacements / totalMembers;
+    const basePoints = Math.floor(accuracy * 150); // Hasta 150 puntos base
+    const bonusPoints = accuracy === 1 ? (quizState.streak * 20) : 0; // Bonus por perfección
+    const totalPoints = basePoints + bonusPoints;
+    
+    setQuizState(prev => ({
+      ...prev,
+      score: prev.score + totalPoints,
+      streak: accuracy === 1 ? prev.streak + 1 : 0
+    }));
+  };
+
+  const handleNextQuestion = () => {
+    if (quizState.index < quizQuestions.length - 1) {
+      setQuizState(prev => ({ ...prev, index: prev.index + 1 }));
+    } else {
+      setQuizState(prev => ({ ...prev, showResults: true }));
+    }
+  };
+
+  const handleRetryQuiz = () => {
+    setQuizState({
+      index: 0,
+      score: 0,
+      streak: 0,
+      showResults: false
+    });
+  };
+
+  const handleCompleteLevel = () => {
+    completeLevel(5);
+    setTimeout(() => {
+      onComplete();
+      navigate('/achievement/5');
+    }, 300);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0">
         <StarField />
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/80" />
       </div>
-      <div className="relative z-10 max-w-[1600px] mx-auto py-10 px-10 animate-fade-in">
-        {/* Botón Volver al Mapa */}
-        <button
-          onClick={() => navigate('/map')}
-          className="absolute top-8 left-8 text-white hover:text-yellow-400 transition-colors flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl px-4 py-2 cursor-pointer"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} />
-          <span>Volver al Mapa</span>
-        </button>
+      
+      <div className="relative z-10 container mx-auto py-8 px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <motion.button
+                  type="button"
+                  onClick={() => navigate('/map')}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 text-white hover:text-yellow-300 transition-colors px-4 py-2 rounded-lg"
+                >
+                  <FontAwesomeIcon icon={faArrowLeft} />
+                  <span>Volver al mapa</span>
+                </motion.button>
+              </div>
+              <div className="flex items-center justify-center space-x-4">
+                <FontAwesomeIcon icon={faUsers} className="text-4xl text-white" />
+                <h1 className="text-4xl font-bold text-white">
+                  Comités de Trabajo
+                </h1>
+              </div>
+              <div className="w-24"></div>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Navigation Tabs */}
-        <div className="flex justify-center gap-6 mb-8">
-          {sectionTabs.map(tab => (
-            <button
+        <div className="flex justify-center gap-4 mb-8 flex-wrap">
+          {sectionTabs.map((tab, idx) => (
+            <motion.div
               key={tab.key}
-              onClick={() => handleTab(tab.key)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold shadow-lg transition-all duration-300 backdrop-blur-md border border-white/20 text-lg hover:scale-105 active:scale-95 ${
-                section === tab.key 
-                  ? 'bg-purple-500/30 text-purple-300 ring-2 ring-purple-400' 
-                  : 'bg-white/10 text-white/80 hover:bg-purple-500/20'
-              }`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: idx * 0.12 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <FontAwesomeIcon icon={tab.icon} />
-              {tab.label}
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveSection(tab.key)}
+                className={`flex items-center gap-2 px-5 py-2 rounded-xl font-medium transition-all duration-300 backdrop-blur-md border ${
+                  activeSection === tab.key 
+                    ? 'bg-purple-500/30 text-purple-300 border-purple-500/50' 
+                    : 'bg-white/10 text-white/70 border-white/20 hover:bg-purple-500/20'
+                }`}
+              >
+                <FontAwesomeIcon icon={tab.icon} />
+                {tab.label}
+              </button>
+            </motion.div>
           ))}
         </div>
 
-        {/* Sección de Miembros */}
-        {section === 'members' && (
-          <div className="flex flex-col lg:flex-row gap-8">
-            {committees.map(com => (
-              <div
-                key={com.name}
-                className="flex-1 bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl transform transition-all duration-300 hover:scale-[1.02] min-w-[700px] animate-slide-up"
+        {/* Content Sections */}
+        <div className="mb-10">
+          <AnimatePresence mode="wait">
+            {activeSection === 'members' && (
+              <motion.div
+                key="members"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.6 }}
               >
-                <h2 className="text-2xl font-bold text-purple-300 mb-2">
-                  {com.name} 
-                  <span className="text-white/60 text-base ml-2">{com.period}</span>
-                </h2>
-                <p className="text-white/80 mb-4">{com.description}</p>
-                <div className="flex flex-col gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-purple-300 mb-4">Representantes de los trabajadores</h3>
-                    <div className="flex flex-wrap gap-6 justify-center">
-                      {com.members.workers.map((m, idx) => (
-                        <div
-                          key={m.name}
-                          className="flex flex-col items-center gap-2 transform transition-all duration-200 hover:scale-105 animate-fade-in-up"
-                          style={{ animationDelay: `${idx * 100}ms` }}
-                        >
-                          <div className="w-24 h-24 rounded-full bg-purple-500/30 flex items-center justify-center shadow-md overflow-hidden">
-                            <img 
-                              src={m.img} 
-                              alt={m.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <span className="text-white/90 text-base text-center">{m.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-violet-300 mb-4">Representantes del empleador</h3>
-                    <div className="flex flex-wrap gap-6 justify-center">
-                      {com.members.employer.map((m, idx) => (
-                        <div
-                          key={m.name}
-                          className="flex flex-col items-center gap-2 transform transition-all duration-200 hover:scale-105 animate-fade-in-up"
-                          style={{ animationDelay: `${idx * 100}ms` }}
-                        >
-                          <div className="w-24 h-24 rounded-full bg-violet-500/30 flex items-center justify-center shadow-md overflow-hidden">
-                            <img 
-                              src={m.img} 
-                              alt={m.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <span className="text-white/90 text-base text-center">{m.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Sección de Funciones */}
-        {section === 'functions' && (
-          <div className="flex flex-col lg:flex-row gap-8">
-            {committees.map(com => (
-              <div
-                key={com.name}
-                className="flex-1 bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl transform transition-all duration-300 hover:scale-[1.02] min-w-[700px] animate-slide-up"
-              >
-                <h2 className="text-2xl font-bold text-purple-300 mb-2">{com.name}</h2>
-                <p className="text-white/80 mb-4">{com.description}</p>
-                <div className="flex flex-col gap-4">
-                  {com.functions.map((f, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-6 bg-white/5 rounded-xl p-5 shadow transform transition-all duration-200 hover:scale-[1.02] hover:bg-purple-900/20 animate-fade-in-up"
-                      style={{ animationDelay: `${i * 100}ms` }}
-                    >
-                      <div className="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-purple-300 text-3xl bg-purple-500/30">
-                        <FontAwesomeIcon icon={f.icon} />
-                      </div>
-                      <div className="flex-1 flex items-center min-h-[3.5rem]">
-                        <p className="text-white/90 text-base leading-relaxed w-full text-left">{f.text}</p>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {committees.map(committee => (
+                    <CommitteeCard 
+                      key={committee.id} 
+                      committee={committee} 
+                      section="members" 
+                    />
                   ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Sección de Quiz */}
-        {section === 'quiz' && !showResult && (
-          <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl transform transition-all duration-300 animate-slide-up">
-            <h2 className="text-2xl font-bold text-purple-300 mb-6">Quiz</h2>
-            <div className="w-full mb-4">
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-400 rounded-full transition-all duration-500"
-                  style={{ width: `${((quizIndex + 1) / quizQuestions.length) * 100}%` }}
+              </motion.div>
+            )}
+            
+            {activeSection === 'functions' && (
+              <motion.div
+                key="functions"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {committees.map(committee => (
+                    <CommitteeCard 
+                      key={committee.id} 
+                      committee={committee} 
+                      section="functions" 
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+            
+            {activeSection === 'quiz' && !quizState.showResults && (
+              <motion.div
+                key="quiz"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="max-w-4xl mx-auto">
+                  <QuizQuestion 
+                    question={quizQuestions[quizState.index]} 
+                    onAnswer={handleAnswer}
+                    onNext={handleNextQuestion}
+                    onDragDropComplete={handleDragDropComplete}
+                    currentIndex={quizState.index}
+                    totalQuestions={quizQuestions.length}
+                    score={quizState.score}
+                    streak={quizState.streak}
+                  />
+                </div>
+              </motion.div>
+            )}
+            
+            {activeSection === 'quiz' && quizState.showResults && (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.6 }}
+              >
+                <ResultsScreen 
+                  score={quizState.score} 
+                  onRetry={handleRetryQuiz}
+                  onComplete={handleCompleteLevel}
                 />
-              </div>
-            </div>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <span className="text-white/80">Puntaje: </span>
-                <span className="text-purple-300 font-bold">{score}</span>
-                {streak > 1 && (
-                  <span className="ml-4 text-purple-400">🔥 Racha: {streak}</span>
-                )}
-              </div>
-              <div className="text-white/80">
-                Mínimo para pasar: <span className="text-purple-300 font-bold">300</span>
-              </div>
-            </div>
-
-            {quizQuestions[quizIndex].type === 'case' ? (
-              <>
-                <div className="bg-white/5 rounded-xl p-6 mb-6 shadow-lg border border-purple-500/20">
-                  <h3 className="text-lg font-semibold text-white mb-4">📋 Caso de Estudio</h3>
-                  <p className="text-white/90 text-lg leading-relaxed mb-6">{quizQuestions[quizIndex].question}</p>
-                </div>
-                <div className="flex flex-col gap-4 w-full">
-                  {quizQuestions[quizIndex].options.map((opt, idx) => (
-                    <button
-                      key={idx}
-                      className={`px-6 py-4 rounded-xl font-bold shadow-md transition-all duration-200 text-lg hover:scale-[1.02] active:scale-95 ${
-                        selected === idx 
-                          ? (opt.committee === quizQuestions[quizIndex].answer
-                              ? 'bg-green-400 text-white' 
-                              : 'bg-red-400 text-white'
-                            ) 
-                          : 'bg-white/10 text-white/80 hover:bg-purple-500/30 hover:text-purple-300'
-                      }`}
-                      onClick={() => handleSelect(idx)}
-                      disabled={selected !== null}
-                    >
-                      <div className="flex flex-col items-start gap-1">
-                        <span className="text-lg font-bold">{opt.committee}</span>
-                        <span className="text-sm opacity-80">{opt.text}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                {selected !== null && (
-                  <div className="mt-6 text-center transition-all duration-300 transform animate-fade-in">
-                    <div className={`text-lg font-semibold ${
-                      quizQuestions[quizIndex].options[selected].committee === quizQuestions[quizIndex].answer
-                        ? 'text-green-400' 
-                        : 'text-red-400'
-                    }`}>
-                      {quizQuestions[quizIndex].options[selected].committee === quizQuestions[quizIndex].answer ? '¡Correcto!' : 'Incorrecto'}
-                    </div>
-                    <div className="text-white/80 mt-2 text-lg">{quizQuestions[quizIndex].explanation}</div>
-                    <button
-                      className="mt-4 px-6 py-2 rounded-xl bg-purple-500 text-white font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
-                      onClick={handleSubmit}
-                    >
-                      {quizIndex < quizQuestions.length - 1 ? 'Siguiente' : 'Ver Resultados'}
-                    </button>
-                  </div>
-                )}
-              </>
-            ) : quizQuestions[quizIndex].type === 'dragdrop' ? (
-              <div className="bg-white/5 rounded-xl p-6 shadow-lg border border-purple-500/20">
-                <h3 className="text-lg font-semibold text-white mb-4">🔄 Organiza los Integrantes</h3>
-                <p className="text-white/90 text-lg leading-relaxed mb-6">{quizQuestions[quizIndex].question}</p>
-                <div className="grid grid-cols-2 gap-6">
-                  {quizQuestions[quizIndex].committees.map(committee => (
-                    <div key={committee} className="bg-white/10 rounded-xl p-4">
-                      <h4 className="text-purple-300 font-bold mb-4 text-center">{committee}</h4>
-                      <div 
-                        className="min-h-[200px] bg-white/5 rounded-lg p-2"
-                        onDragOver={e => e.preventDefault()}
-                        onDrop={e => {
-                          e.preventDefault();
-                          const member = JSON.parse(e.dataTransfer.getData('text'));
-                          handleDrop(member, committee);
-                        }}
-                      >
-                        {droppedMembers[committee].map(member => (
-                          <div 
-                            key={member.name}
-                            className="px-4 py-2 mb-2 bg-purple-500/20 rounded-lg text-white flex items-center gap-3 animate-fade-in"
-                            onClick={() => handleRemoveMember(member.name, committee)}
-                          >
-                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                              <img 
-                                src={member.img} 
-                                alt={member.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <span>{member.name}</span>
-                            <button className="text-white/60 hover:text-white ml-auto">×</button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 p-4 bg-white/5 rounded-xl">
-                  <h4 className="text-purple-300 font-bold mb-4 text-center">Integrantes</h4>
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    {quizQuestions[quizIndex].members.filter(member => 
-                      !Object.values(droppedMembers).flat().some(m => m.name === member.name)
-                    ).map(member => (
-                      <div
-                        key={member.name}
-                        className="px-4 py-2 bg-purple-500/20 rounded-lg text-white cursor-move hover:bg-purple-500/30 transition-colors flex items-center gap-3"
-                        draggable
-                        onDragStart={e => {
-                          e.dataTransfer.setData('text', JSON.stringify(member));
-                        }}
-                      >
-                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                          <img 
-                            src={member.img} 
-                            alt={member.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        {member.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {droppedMembers.COPASST.length + droppedMembers.CCL.length === quizQuestions[quizIndex].members.length && (
-                  <div className="mt-6 flex justify-center">
-                    <button
-                      className="px-6 py-2 rounded-xl bg-purple-500 text-white font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
-                      onClick={handleSubmit}
-                    >
-                      Continuar
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-        )}
-
-        {/* Sección de Resultados */}
-        {section === 'result' && (
-          <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl flex flex-col items-center transform transition-all duration-300 animate-slide-up">
-            <h2 className="text-2xl font-bold text-purple-300 mb-6">Resultados</h2>
-            <div className="mb-4 text-white/80 text-lg">
-              Puntaje final: <span className="text-purple-300 font-bold">{score}</span>
-            </div>
-            <div className="mb-6">
-              {score >= 400 ? (
-                <span className="text-green-400 font-bold text-xl flex items-center gap-2">
-                  <FontAwesomeIcon icon={faMedal} /> ¡Medalla de oro!
-                </span>
-              ) : score >= 300 ? (
-                <span className="text-purple-400 font-bold text-xl flex items-center gap-2">
-                  <FontAwesomeIcon icon={faMedal} /> ¡Medalla de plata!
-                </span>
-              ) : (
-                <span className="text-gray-300 font-bold text-xl flex items-center gap-2">
-                  <FontAwesomeIcon icon={faMedal} /> ¡Sigue practicando!
-                </span>
-              )}
-            </div>
-            <button
-              className="px-6 py-2 rounded-xl bg-purple-500 text-white font-bold shadow-md hover:scale-105 active:scale-95 transition-all duration-200"
-              onClick={onComplete}
-            >
-              Completar nivel
-            </button>
-          </div>
-        )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
