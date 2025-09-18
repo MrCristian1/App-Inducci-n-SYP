@@ -5,6 +5,8 @@ import { faArrowLeft, faBullseye, faScroll, faClipboardList, faChevronDown, faCh
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import OptimizedImage from './OptimizedImage';
+
 const QualityLevel = () => {
   const navigate = useNavigate();
   const { completeLevel } = useAppContext();
@@ -477,19 +479,16 @@ const QualityLevel = () => {
                                 </div>
                                 <p className="text-white/80 mb-6 text-left">{item.content.description}</p>
                                 <div className="bg-white/5 p-4 rounded-2xl border border-white/10 mb-6">
-                                  <img 
-                                    src="/img/iso9001.png" 
-                                    alt="ISO 9001:2015 Certification" 
-                                    className="max-w-xs w-full h-auto rounded-lg mx-auto animate-fade-in-up"
-                                    style={{
-                                      animationDelay: '0.3s',
-                                      animationFillMode: 'both'
-                                    }}
-                                    onError={(e) => {
-                                      e.target.style.display = 'none';
-                                      e.target.nextElementSibling.style.display = 'flex';
-                                    }}
-                                  />
+                                    <OptimizedImage
+                                      src="/img/iso9001.png"
+                                      alt="ISO 9001:2015 Certification"
+                                      type="logo"
+                                      className="max-w-xs w-full h-auto rounded-lg mx-auto animate-fade-in-up"
+                                      style={{
+                                        animationDelay: '0.3s',
+                                        animationFillMode: 'both'
+                                      }}
+                                    />
                                   <div className="hidden items-center justify-center h-40 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-white/10">
                                     <div className="text-5xl">🏆</div>
                                     <div className="ml-4">

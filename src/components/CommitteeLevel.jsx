@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppContext } from '../context/AppContext';
+import OptimizedImage from './OptimizedImage';
 import { 
   faClipboardCheck, faSearch, faLightbulb, 
   faShieldAlt, faUsers, faComments, faHandshake, faStar, 
@@ -197,13 +198,11 @@ const CommitteeCard = ({ committee, section }) => {
                   className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20">
-                    <img 
+                    <OptimizedImage 
                       src={m.img} 
                       alt={m.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNCAwLTE2IDIuNjgtMTYgOHYyaDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
-                      }}
+                      type="profile"
+                      className="w-full h-full"
                     />
                   </div>
                   <span className="text-white/90 text-sm text-center">{m.name}</span>
@@ -226,13 +225,11 @@ const CommitteeCard = ({ committee, section }) => {
                   className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20">
-                    <img 
+                    <OptimizedImage 
                       src={m.img} 
                       alt={m.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNCAwLTE2IDIuNjgtMTYgOHYyaDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
-                      }}
+                      type="profile"
+                      className="w-full h-full"
                     />
                   </div>
                   <span className="text-white/90 text-sm text-center">{m.name}</span>
@@ -496,13 +493,11 @@ const DragDropQuestion = ({ question, onComplete, isAnswered, onDragDropComplete
                     className={`flex items-center gap-2 p-2 rounded bg-${colors}-500/20 text-white text-sm`}
                   >
                     <div className="w-6 h-6 rounded-full overflow-hidden">
-                      <img 
+                      <OptimizedImage 
                         src={member.img} 
                         alt={member.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNCAwLTE2IDIuNjgtMTYgOHYyaDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
-                        }}
+                        type="profile"
+                        className="w-full h-full"
                       />
                     </div>
                     <span className="flex-1">{member.name}</span>
@@ -531,13 +526,11 @@ const DragDropQuestion = ({ question, onComplete, isAnswered, onDragDropComplete
               className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded text-white text-sm cursor-move hover:bg-white/20"
             >
               <div className="w-6 h-6 rounded-full overflow-hidden">
-                <img 
+                <OptimizedImage 
                   src={member.img} 
                   alt={member.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMmM0LjQxIDAgOC0zLjU5IDgtOHMtMy41OS04LTgtOC04IDMuNTktOCA4IDMuNTkgOCA4IDh6bTAgMmMtNS4zNGEgMC0xNiAyLjY4LTE2IDh2aDMydi0yYzAtNS4zMi0xMC42Ni04LTE2LTh6Ii8+PC9zdmc+';
-                  }}
+                  type="profile"
+                  className="w-full h-full"
                 />
               </div>
               {member.name}

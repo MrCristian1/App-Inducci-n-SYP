@@ -1,3 +1,5 @@
+
+import OptimizedImage from './OptimizedImage';
 import React, { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -375,9 +377,10 @@ const ProcessMapLevel = () => {
               {/* Efecto de brillo en los bordes */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl pointer-events-none"></div>
               
-              <img 
-                src="/img/mapa-procesos.png" 
-                alt="Mapa de Procesos de Solutions and Payroll" 
+              <OptimizedImage
+                src="/img/mapa-procesos.png"
+                alt="Mapa de Procesos de Solutions and Payroll"
+                type="illustration"
                 className="w-full h-auto max-w-4xl mx-auto rounded-xl shadow-lg"
               />
               
