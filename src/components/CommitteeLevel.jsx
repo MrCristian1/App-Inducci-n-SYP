@@ -19,15 +19,15 @@ const committees = [
     color: 'purple',
     members: {
       workers: [
-        { name: 'Tatiana Chavarro', img: '../../../img/Tatiana.png' },
-        { name: 'Dayan Manjarres', img: '../../../img/Dayana.png' },
-        { name: 'Germán Hincapié', img: '../../../img/German.png' },
+        { name: 'Tatiana Chavarro', img: '/img/Tatiana.png' },
+        { name: 'Dayan Manjarres', img: '/img/Dayana.png' },
+        { name: 'Germán Hincapié', img: '/img/German.png' },
       ],
       employer: [
-        { name: 'Luisa Díaz', img: '../../../img/Luisa.png' },
-        { name: 'Jennifer Cervantes', img: '../../../img/Jennifer.png' },
-        { name: 'Ricardo Arámbulo', img: '../../../img/Ricardo.png' },
-        { name: 'Eduard Forero', img: '../../../img/Eduard.png' },
+        { name: 'Luisa Díaz', img: '/img/Luisa.png' },
+        { name: 'Jennifer Cervantes', img: '/img/Jennifer.png' },
+        { name: 'Ricardo Arámbulo', img: '/img/Ricardo.png' },
+        { name: 'Eduard Forero', img: '/img/Eduard.png' },
       ],
     },
     functions: [
@@ -46,15 +46,15 @@ const committees = [
     color: 'blue',
     members: {
       workers: [
-        { name: 'Giovanna Gio', img: '../../../img/Giovanna.png' },
-        { name: 'Yuly Peña', img: '../../../img/Yuly.png' },
-        { name: 'Fabián Morales', img: '../../../img/Fabian.png' },
-        { name: 'Rocío Guacamene', img: '../../../img/Rocio.png' },
+        { name: 'Giovanna Gio', img: '/img/Giovanna.png' },
+        { name: 'Yuly Peña', img: '/img/Yuly.png' },
+        { name: 'Fabián Morales', img: '/img/Fabian.png' },
+        { name: 'Rocío Guacamene', img: '/img/Rocio.png' },
       ],
       employer: [
-        { name: 'Luisa Díaz', img: '../../../img/Luisa.png' },
-        { name: 'Ricardo Arámbulo', img: '../../../img/Ricardo.png' },
-        { name: 'Alfonso Fonseca', img: '../../../img/Alfonso.png' },
+        { name: 'Luisa Díaz', img: '/img/Luisa.png' },
+        { name: 'Ricardo Arámbulo', img: '/img/Ricardo.png' },
+        { name: 'Alfonso Fonseca', img: '/img/Alfonso.png' },
       ],
     },
     functions: [
@@ -95,12 +95,12 @@ const quizQuestions = [
     type: 'dragdrop',
     question: 'Arrastra cada integrante al comité al que pertenece',
     members: [
-      { name: 'Tatiana Chavarro', committee: 'COPASST', img: '../../../img/Tatiana.png' },
-      { name: 'Giovanna Gio', committee: 'CCL', img: '../../../img/Giovanna.png' },
-      { name: 'Dayan Manjarres', committee: 'COPASST', img: '../../../img/Dayana.png' },
-      { name: 'Yuly Peña', committee: 'CCL', img: '../../../img/Yuly.png' },
-      { name: 'Germán Hincapié', committee: 'COPASST', img: '../../../img/German.png' },
-      { name: 'Fabián Morales', committee: 'CCL', img: '../../../img/Fabian.png' }
+      { name: 'Tatiana Chavarro', committee: 'COPASST', img: '/img/Tatiana.png' },
+      { name: 'Giovanna Gio', committee: 'CCL', img: '/img/Giovanna.png' },
+      { name: 'Dayan Manjarres', committee: 'COPASST', img: '/img/Dayana.png' },
+      { name: 'Yuly Peña', committee: 'CCL', img: '/img/Yuly.png' },
+      { name: 'Germán Hincapié', committee: 'COPASST', img: '/img/German.png' },
+      { name: 'Fabián Morales', committee: 'CCL', img: '/img/Fabian.png' }
     ],
     committees: ['COPASST', 'CCL']
   }

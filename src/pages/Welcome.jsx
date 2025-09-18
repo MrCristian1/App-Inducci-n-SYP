@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
-import logo from '../../img/syp.png'
 import { useState, useEffect } from 'react'
 
 const Welcome = () => {
@@ -168,7 +167,7 @@ const Welcome = () => {
                 duration: 1.2 
               }}
             >
-              <img src={logo} alt={`${companyConfig.companyName} Logo`} className="w-full h-full" />
+              <img src="/img/syp.png" alt={`${companyConfig.companyName} Logo`} className="w-full h-full" />
             </motion.div>
           )}
           
@@ -199,7 +198,7 @@ const Welcome = () => {
                   }
                 }}
               >
-                <img src={logo} alt={`${companyConfig.companyName} Logo`} className="w-full h-full" />
+                <img src="/img/syp.png" alt={`${companyConfig.companyName} Logo`} className="w-full h-full" />
               </motion.div>
               
               {showButton && !showNameInput && (

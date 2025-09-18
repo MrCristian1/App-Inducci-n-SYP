@@ -22,7 +22,6 @@ import {
   faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import { useAppContext } from '../context/AppContext';
-import logo from '../../img/syp.png';
 
 // Nuevo componente de confeti mejorado
 const ImprovedConfetti = () => {
@@ -271,7 +270,7 @@ function FinalCertificate() {
             >
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400/30 to-orange-500/30 backdrop-blur-sm p-3 border-2 border-yellow-300/30">
-                  <img src={logo} alt="Solutions and Payroll" className="w-full h-full object-contain filter drop-shadow-lg" />
+                  <img src="/img/syp.png" alt="Solutions and Payroll" className="w-full h-full object-contain filter drop-shadow-lg" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
                   <FontAwesomeIcon icon={faCertificate} className="text-white text-xs" />

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBookOpen, faTasks, faHeart, faUsers, faSitemap, faLock, faCheck, faArrowRight, faTrophy, faStar, faGem, faRocket, faBriefcase, faUsersCog, faAward, faExclamationTriangle, faCog } from '@fortawesome/free-solid-svg-icons'
-import logo from '../../img/syp.png'
 import { useRef, useEffect, useState, useCallback } from 'react'
 import OnboardingTour from '../components/OnboardingTour'
 
@@ -598,7 +597,7 @@ const Map = () => {
           >
             <div className="absolute inset-0 bg-white/20 rounded-2xl blur-xl"></div>
             <img 
-              src={logo} 
+              src="/img/syp.png" 
               alt="Logo" 
               className="w-20 h-20 relative z-10 drop-shadow-lg" 
             />

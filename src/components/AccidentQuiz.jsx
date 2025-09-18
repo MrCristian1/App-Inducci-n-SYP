@@ -372,7 +372,7 @@ const AccidentQuiz = ({ onClose }) => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} {...{ className: "fade-in" }}>
             <h3 className="font-bold text-xl mb-4 text-blue-200 drop-shadow text-center">Identifica los Riesgos</h3>
             <div className="bg-blue-100/30 backdrop-blur-md rounded-xl p-4 mb-4 flex flex-col items-center gap-2 text-white border border-blue-200 shadow mx-auto max-w-md">
-              <img src="img/situacion-nivel6.png" alt="Situación nivel 6" className="w-32 h-auto mb-4 rounded-xl shadow" />
+              <img src="/img/situacion-nivel6.png" alt="Situación nivel 6" className="w-32 h-auto mb-4 rounded-xl shadow" />
               <span>🏢</span>Oficina con empleados en computadoras 8 horas, sillas sin apoyo lumbar, pantallas brillantes, ruido de aires acondicionados, cables sueltos, presión por metas
             </div>
             <textarea value={state.analysisText} onChange={e => setState(s => ({ ...s, analysisText: e.target.value }))} className="w-full h-32 border border-blue-200 bg-white/40 backdrop-blur-md rounded-xl p-4 mb-4 text-blue-900 font-bold shadow" placeholder="Escribe tu análisis aquí..." />
