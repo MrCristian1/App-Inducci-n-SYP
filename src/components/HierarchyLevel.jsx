@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
@@ -6,12 +7,14 @@ import {
   faGamepad, 
   faArrowRight,
   faStar,
-  faCheck
+  faCheck,
+  faArrowLeft
 } from '@fortawesome/free-solid-svg-icons'
 import OrganizationalChart from './OrganizationalChart'
 import HierarchyDragDrop from './HierarchyDragDrop'
 
 const HierarchyLevel = ({ onComplete }) => {
+  const navigate = useNavigate()
   const [currentPhase, setCurrentPhase] = useState('chart') // 'chart' o 'challenge'
   const [challengeCompleted, setChallengeCompleted] = useState(false)
 
@@ -50,7 +53,7 @@ const HierarchyLevel = ({ onComplete }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Estrellas animadas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
         {generateStars()}
@@ -62,15 +65,28 @@ const HierarchyLevel = ({ onComplete }) => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          style={{ marginBottom: '2rem' }}
         >
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <FontAwesomeIcon icon={faSitemap} className="text-4xl text-white" />
-            <h1 className="text-4xl font-bold text-white">
-              Jerarquía y Estructura Organizacional
-            </h1>
+          <div className="flex items-center justify-between">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <button
+                type="button"
+                onClick={() => navigate('/map')}
+                className="flex items-center gap-2 text-white hover:text-yellow-300 transition-colors px-4 py-2 rounded-lg"
+              >
+                <FontAwesomeIcon icon={faArrowLeft} />
+                <span>Volver al mapa</span>
+              </button>
+            </motion.div>
+            <div className="flex items-center justify-center space-x-4">
+              <FontAwesomeIcon icon={faSitemap} className="text-4xl text-white" />
+              <h1 className="text-4xl font-bold text-white">
+                Jerarquía y Estructura Organizacional
+              </h1>
+            </div>
+            <div className="w-24"></div>
           </div>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto text-center mt-4">
             Explora nuestra estructura organizacional de forma interactiva y pon a prueba tus conocimientos
           </p>
         </motion.div>
@@ -80,7 +96,7 @@ const HierarchyLevel = ({ onComplete }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex justify-center mb-8"
+          style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}
         >
           <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-2 flex space-x-2">
             <button
@@ -128,13 +144,16 @@ const HierarchyLevel = ({ onComplete }) => {
               
               <div className="text-center">
                 <motion.button
-                  onClick={() => handlePhaseChange('challenge')}
-                  className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
-                  Continuar al Desafío
+                  <button
+                    onClick={() => handlePhaseChange('challenge')}
+                    className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
+                    Continuar al Desafío
+                  </button>
                 </motion.button>
               </div>
             </motion.div>
@@ -158,7 +177,7 @@ const HierarchyLevel = ({ onComplete }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="fixed bottom-8 right-8 bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-4"
+          style={{ position: 'fixed', bottom: '2rem', right: '2rem', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '1rem', padding: '1rem' }}
         >
           <div className="flex items-center space-x-3">
             <div className={`w-3 h-3 rounded-full ${currentPhase === 'chart' ? 'bg-purple-400' : 'bg-gray-400'}`} />
@@ -177,17 +196,17 @@ const HierarchyLevel = ({ onComplete }) => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
             >
               <motion.div
                 initial={{ y: 50 }}
                 animate={{ y: 0 }}
-                className="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center"
+                style={{ background: 'white', borderRadius: '1rem', padding: '2rem', maxWidth: '28rem', width: '100%', margin: '0 1rem', textAlign: 'center' }}
               >
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  className="inline-block mb-4"
+                  style={{ display: 'inline-block', marginBottom: '1rem' }}
                 >
                   <FontAwesomeIcon icon={faStar} className="text-6xl text-yellow-500" />
                 </motion.div>

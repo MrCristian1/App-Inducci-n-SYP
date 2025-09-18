@@ -212,11 +212,9 @@ const ValuesGameLevel = () => {
   };
 
   return (
-    <>
-      <motion.div 
-        className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden"
-      >
-        {/* Estrellas animadas */}
+  <React.Fragment>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 fixed inset-0 overflow-hidden -z-10">
+        {/* Estrellas animadas - fondo fijo */}
         <div className="absolute inset-0 pointer-events-none">
           {stars.map((star) => (
             <div
@@ -231,8 +229,9 @@ const ValuesGameLevel = () => {
             />
           ))}
         </div>
+      </div>
 
-        <div className="relative z-10 container mx-auto px-6 py-8">
+      <div className="relative z-10 container mx-auto px-6 py-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-6">
@@ -591,8 +590,9 @@ const ValuesGameLevel = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
-    </>
+  {/* Fin del contenido principal */}
+  {/* El fondo ahora está fuera del motion.div principal */}
+  </React.Fragment>
   );
 }
 

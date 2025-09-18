@@ -273,15 +273,7 @@ const PoliciesLevel = ({ level, onStartQuiz }) => {
                             </div>
                             
                             <div className="flex items-center justify-between">
-                              <motion.div 
-                                className="flex items-center space-x-3"
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.8 }}
-                              >
-                                <FontAwesomeIcon icon={faEye} className="text-white/70 text-xl" />
-                                <span className="text-white/70 font-medium text-lg">Haz clic para ver detalles</span>
-                              </motion.div>
+                              {/* Eliminado el icono faEye */}
                               <motion.div
                                 className="bg-white/20 backdrop-blur-sm px-5 py-3 rounded-full font-bold border border-white/40"
                                 initial={{ opacity: 0, scale: 0 }}

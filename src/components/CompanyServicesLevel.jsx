@@ -136,28 +136,30 @@ const CompanyServicesLevel = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Estrellas animadas de fondo */}
-      <div className="absolute inset-0 overflow-hidden">
-        {stars.map((star) => (
-          <motion.div
-            key={star.id}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-60"
-            style={{
-              left: `${star.left}%`,
-              top: `${star.top}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: star.duration,
-              repeat: Infinity,
-              delay: star.delay,
-            }}
-          />
-        ))}
+    <>
+      <div className="fixed inset-0 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden -z-10">
+        {/* Estrellas animadas de fondo fijo */}
+        <div className="absolute inset-0 pointer-events-none">
+          {stars.map((star) => (
+            <motion.div
+              key={star.id}
+              className="absolute w-1 h-1 bg-white rounded-full opacity-60"
+              style={{
+                left: `${star.left}%`,
+                top: `${star.top}%`,
+              }}
+              animate={{
+                opacity: [0.3, 1, 0.3],
+                scale: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: star.duration,
+                repeat: Infinity,
+                delay: star.delay,
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -317,7 +319,7 @@ const CompanyServicesLevel = () => {
           </div>
         </div>
       </div>
-    </div>
+  </>
   );
 };
 

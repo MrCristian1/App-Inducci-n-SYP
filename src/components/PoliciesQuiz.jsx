@@ -344,10 +344,20 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Columna de definiciones */}
           <div>
-            <h3 className="text-2xl font-bold text-white mb-6 text-center">Definiciones</h3>
+            <motion.h3 
+              className="text-2xl font-bold text-white mb-6 text-center"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >Definiciones</motion.h3>
             <div className="space-y-4">
               {shuffledDefinitions.map((item, index) => (
-                <div key={`def-${item.id}`}>
+                <motion.div
+                  key={`def-${item.id}`}
+                  initial={{ opacity: 0, x: -40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + index * 0.08 }}
+                >
                   {renderCard(
                     item,
                     'def',
@@ -355,17 +365,27 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
                     matchedPairs.has(item.id),
                     handleDefinitionClick
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
           {/* Columna de nombres de políticas */}
           <div>
-            <h3 className="text-2xl font-bold text-white mb-6 text-center">Nombres de Políticas</h3>
+            <motion.h3 
+              className="text-2xl font-bold text-white mb-6 text-center"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >Nombres de Políticas</motion.h3>
             <div className="space-y-4">
               {shuffledPolicies.map((item, index) => (
-                <div key={`pol-${item.id}`}>
+                <motion.div
+                  key={`pol-${item.id}`}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + index * 0.08 }}
+                >
                   {renderCard(
                     item,
                     'pol',
@@ -373,7 +393,7 @@ const PoliciesQuiz = ({ level, onComplete, onBackToPolicies, onNavigateToMap }) 
                     matchedPairs.has(item.id),
                     handlePolicyClick
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

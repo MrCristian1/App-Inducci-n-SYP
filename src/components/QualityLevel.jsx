@@ -1,10 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useAppContext } from '../context/AppContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faBullseye, faScroll, faClipboardList, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faBullseye, faScroll, faClipboardList, faChevronDown, faChevronUp, faLightbulb, faTrophy } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const QualityLevel = () => {
   const navigate = useNavigate();
+  const { completeLevel } = useAppContext();
   const [expandedCard, setExpandedCard] = useState(null);
   const [showGame, setShowGame] = useState(false);
   const [currentGameWord, setCurrentGameWord] = useState(0);
@@ -13,16 +16,18 @@ const QualityLevel = () => {
   const [gameWon, setGameWon] = useState(false);
   const [gameLost, setGameLost] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [achievementUnlocked, setAchievementUnlocked] = useState(false);
   const maxWrongGuesses = 6;
   
   // Generar estrellas animadas
   const stars = useMemo(() => {
-    return [...Array(50)].map((_, i) => ({
+    return [...Array(80)].map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
       duration: 2 + Math.random() * 3,
-      delay: Math.random() * 2
+      delay: Math.random() * 2,
+      size: Math.random() * 3 + 1
     }));
   }, []);
 
@@ -38,15 +43,18 @@ const QualityLevel = () => {
         objectives: [
           {
             title: 'Mejoramiento Continuo',
-            description: 'Cerrar eficazmente las acciones de mejora para lograr el mejoramiento continuo de los procesos'
+            description: 'Cerrar eficazmente las acciones de mejora para lograr el mejoramiento continuo de los procesos',
+            icon: '🔄'
           },
           {
             title: 'Fidelización de Clientes',
-            description: 'Garantizar el cumplimiento de los compromisos adquiridos para lograr la fidelización de nuestros clientes'
+            description: 'Garantizar el cumplimiento de los compromisos adquiridos para lograr la fidelización de nuestros clientes',
+            icon: '🤝'
           },
           {
             title: 'Gestión Interna',
-            description: 'Garantizar el cumplimiento de la gestión interna para soportar adecuadamente la operación'
+            description: 'Garantizar el cumplimiento de la gestión interna para soportar adecuadamente la operación',
+            icon: '🏢'
           }
         ]
       }
@@ -81,23 +89,28 @@ const QualityLevel = () => {
         documentalPractices: [
           {
             category: 'Documentos y registros',
-            description: 'Asegurar que estén identificados, actualizados, disponibles y protegidos, no se pueden modificar sin autorización del líder del proceso'
+            description: 'Asegurar que estén identificados, actualizados, disponibles y protegidos, no se pueden modificar sin autorización del líder del proceso',
+            icon: '📁'
           },
           {
             category: 'Acceso y conservación',
-            description: 'Garantizar que solo personal autorizado tenga acceso a las carpetas y a las versiones vigentes'
+            description: 'Garantizar que solo personal autorizado tenga acceso a las carpetas y a las versiones vigentes',
+            icon: '🔐'
           },
           {
             category: 'Eliminación controlada',
-            description: 'Asegurar el retiro o anulación de documentos obsoletos para evitar su uso indebido'
+            description: 'Asegurar el retiro o anulación de documentos obsoletos para evitar su uso indebido',
+            icon: '🗑️'
           },
           {
             category: 'Espacios en blanco',
-            description: 'Todos los espacios en formatos deben ser diligenciados, en caso de no requerirse se debe escribir "No aplica"'
+            description: 'Todos los espacios en formatos deben ser diligenciados, en caso de no requerirse se debe escribir "No aplica"',
+            icon: '📝'
           },
           {
             category: 'Soporte de evidencia',
-            description: 'Todo registro debe ser legible, verificable y conservarse como evidencia del cumplimiento del sistema'
+            description: 'Todo registro debe ser legible, verificable y conservarse como evidencia del cumplimiento del sistema',
+            icon: '🔍'
           }
         ],
         typography: {
@@ -157,6 +170,7 @@ const QualityLevel = () => {
     setGameWon(false);
     setGameLost(false);
     setShowHint(false);
+    setAchievementUnlocked(false);
   };
 
   const guessLetter = (letter) => {
@@ -184,14 +198,22 @@ const QualityLevel = () => {
   const displayWord = () => {
     const word = gameWords[currentGameWord].word;
     return word.split('').map(letter => {
-      if (letter === ' ') return ' ';
-      return guessedLetters.includes(letter) ? letter : '_';
-    }).join(' ');
+      if (letter === ' ') return <span className="mx-1">&nbsp;</span>;
+      return <span className="mx-1">{guessedLetters.includes(letter) ? letter : '_'}</span>;
+    });
   };
 
   const resetGame = () => {
     setShowGame(false);
     startNewGame();
+  };
+
+  const claimAchievement = () => {
+    setAchievementUnlocked(true);
+    completeLevel(7);
+    setTimeout(() => {
+      navigate('/achievement/7');
+    }, 500);
   };
 
   // Inicializar el juego cuando se monte el componente
@@ -204,31 +226,25 @@ const QualityLevel = () => {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-slate-800/90 to-purple-900/90 backdrop-blur-lg border border-white/20 rounded-3xl p-6 md:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
           {/* Header del juego */}
           <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-white mb-2">🎮 Juego de Calidad</h2>
-            <p className="text-white/80">Adivina las palabras clave del Sistema de Gestión de Calidad</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">🎮 Juego de Calidad</h2>
+            <p className="text-white/80 text-sm md:text-base">Adivina las palabras clave del Sistema de Gestión de Calidad</p>
           </div>
 
-          {/* Candado/Progreso */}
-          <div className="text-center mb-6">
-            <div className="text-6xl mb-2">
-              {wrongGuesses === 0 && "🔓"}
-              {wrongGuesses === 1 && "🔐"}
-              {wrongGuesses === 2 && "🔒"}
-              {wrongGuesses >= 3 && wrongGuesses < 5 && "⛓️"}
-              {wrongGuesses >= 5 && "🔴"}
-            </div>
-            <div className="text-white/70">
-              Intentos restantes: {maxWrongGuesses - wrongGuesses}
-            </div>
+          {/* Indicador de progreso */}
+          <div className="w-full bg-gray-700/50 rounded-full h-2.5 mb-6">
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full transition-all duration-500" 
+              style={{ width: `${(wrongGuesses / maxWrongGuesses) * 100}%` }}
+            ></div>
           </div>
 
           {/* Palabra a adivinar */}
-          <div className="text-center mb-8">
-            <div className="text-4xl font-bold text-white tracking-wider font-mono">
+          <div className="text-center mb-8 p-4 bg-white/5 rounded-2xl border border-white/10">
+            <div className="text-2xl md:text-4xl font-bold text-white tracking-wider font-mono min-h-[60px] flex items-center justify-center flex-wrap">
               {showGame && gameWords[currentGameWord] ? displayWord() : ''}
             </div>
           </div>
@@ -237,13 +253,14 @@ const QualityLevel = () => {
           <div className="text-center mb-6">
             <button
               onClick={() => setShowHint(!showHint)}
-              className="bg-yellow-500/20 text-yellow-200 px-4 py-2 rounded-xl border border-yellow-500/30 hover:bg-yellow-500/30 transition-all"
+              className="bg-gradient-to-r from-yellow-600/30 to-amber-600/30 text-yellow-200 px-4 py-2 rounded-xl border border-yellow-500/30 hover:from-yellow-600/40 hover:to-amber-600/40 transition-all flex items-center justify-center gap-2 mx-auto"
             >
-              {showHint ? '🔍 Ocultar Pista' : '💡 Ver Pista'}
+              <FontAwesomeIcon icon={faLightbulb} />
+              {showHint ? 'Ocultar Pista' : 'Ver Pista'}
             </button>
             {showHint && gameWords[currentGameWord] && (
-              <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                <p className="text-white/80 italic">"{gameWords[currentGameWord].hint}"</p>
+              <div className="mt-4 p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20 backdrop-blur-sm">
+                <p className="text-yellow-200/90 italic text-sm md:text-base">"{gameWords[currentGameWord].hint}"</p>
               </div>
             )}
           </div>
@@ -257,12 +274,12 @@ const QualityLevel = () => {
                   onClick={() => guessLetter(letter)}
                   disabled={guessedLetters.includes(letter)}
                   className={`
-                    w-10 h-10 rounded-xl font-bold transition-all duration-300
+                    w-8 h-8 md:w-10 md:h-10 rounded-lg font-bold transition-all duration-300 flex items-center justify-center
                     ${guessedLetters.includes(letter)
                       ? gameWords[currentGameWord]?.word.includes(letter)
-                        ? 'bg-green-500/30 text-green-200 border-green-400/50'
-                        : 'bg-red-500/30 text-red-200 border-red-400/50'
-                      : 'bg-white/10 text-white hover:bg-white/20 border-white/20'
+                        ? 'bg-green-500/40 text-green-100 border-green-400/60 shadow-lg'
+                        : 'bg-red-500/40 text-red-100 border-red-400/60 shadow-lg'
+                      : 'bg-white/10 text-white hover:bg-white/20 border-white/20 hover:shadow-md'
                     }
                     border backdrop-blur-sm
                   `}
@@ -275,11 +292,14 @@ const QualityLevel = () => {
 
           {/* Mensaje de victoria */}
           {gameWon && gameWords[currentGameWord] && (
-            <div className="text-center mb-6">
-              <div className="text-6xl mb-4">🎉</div>
+            <div className="text-center mb-6 animate-fade-in">
+              <div className="text-6xl mb-4 animate-bounce">🎉</div>
               <h3 className="text-2xl font-bold text-green-400 mb-2">¡Excelente!</h3>
-              <div className="bg-green-500/20 p-4 rounded-xl border border-green-500/30 mb-4">
-                <p className="text-green-200 mb-2">{gameWords[currentGameWord].badge}</p>
+              <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 p-4 rounded-xl border border-green-500/30 mb-4 backdrop-blur-sm">
+                <p className="text-green-200 mb-2 flex items-center justify-center gap-2">
+                  <FontAwesomeIcon icon={faTrophy} />
+                  {gameWords[currentGameWord].badge}
+                </p>
                 <p className="text-white/80 text-sm italic">"{gameWords[currentGameWord].explanation}"</p>
               </div>
             </div>
@@ -287,22 +307,22 @@ const QualityLevel = () => {
 
           {/* Mensaje de derrota */}
           {gameLost && gameWords[currentGameWord] && (
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 animate-fade-in">
               <div className="text-6xl mb-4">😔</div>
               <h3 className="text-2xl font-bold text-red-400 mb-2">¡Sigue intentando!</h3>
-              <div className="bg-red-500/20 p-4 rounded-xl border border-red-500/30 mb-4">
-                <p className="text-red-200 mb-2">La respuesta era: <strong>{gameWords[currentGameWord].word}</strong></p>
+              <div className="bg-gradient-to-r from-red-600/20 to-orange-600/20 p-4 rounded-xl border border-red-500/30 mb-4 backdrop-blur-sm">
+                <p className="text-red-200 mb-2">La respuesta era: <strong className="text-white">{gameWords[currentGameWord].word}</strong></p>
                 <p className="text-white/80 text-sm italic">"{gameWords[currentGameWord].explanation}"</p>
               </div>
             </div>
           )}
 
           {/* Botones */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {gameWon && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {gameWon && !achievementUnlocked && (
               <button
-                onClick={() => navigate('/achievement/7')}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105"
+                onClick={claimAchievement}
+                className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-5 py-2.5 rounded-xl font-bold hover:from-yellow-600 hover:to-amber-600 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
               >
                 🏆 Reclamar Logro
               </button>
@@ -310,14 +330,14 @@ const QualityLevel = () => {
             {gameLost && (
               <button
                 onClick={startNewGame}
-                className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:from-green-700 hover:to-blue-700 transition-all"
+                className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-5 py-2.5 rounded-xl font-bold hover:from-green-600 hover:to-teal-600 transition-all flex items-center justify-center gap-2"
               >
-                🎮 Jugar de Nuevo
+                🔄 Jugar de Nuevo
               </button>
             )}
             <button
               onClick={resetGame}
-              className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl font-bold hover:from-gray-700 hover:to-gray-800 transition-all"
+              className="bg-gradient-to-r from-gray-600 to-slate-700 text-white px-5 py-2.5 rounded-xl font-bold hover:from-gray-700 hover:to-slate-800 transition-all flex items-center justify-center gap-2"
             >
               ← Volver al Timeline
             </button>
@@ -328,7 +348,7 @@ const QualityLevel = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden font-[Calibri] text-gray-100">
+    <div className="min-h-screen relative overflow-hidden font-sans text-gray-100">
       {/* Fondo y estrellas */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         {stars.map((star) => (
@@ -338,8 +358,8 @@ const QualityLevel = () => {
             style={{
               left: `${star.left}%`,
               top: `${star.top}%`,
-              width: '2px',
-              height: '2px',
+              width: `${star.size}px`,
+              height: `${star.size}px`,
               animationDuration: `${star.duration}s`,
               animationDelay: `${star.delay}s`,
             }}
@@ -348,25 +368,28 @@ const QualityLevel = () => {
       </div>
       
       {/* Botón volver al mapa */}
-      <div className="absolute top-8 left-8 z-20">
-        <button
+      <div className="fixed top-6 left-6 z-20">
+        <motion.button
+          type="button"
           onClick={() => navigate('/map')}
-          className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors font-semibold text-lg cursor-pointer focus:outline-none px-4 py-2 rounded-xl animate-slide-in-left"
-          style={{ minHeight: '48px', lineHeight: '1.5', animationDelay: '0.1s', animationFillMode: 'both' }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-2 text-white hover:text-yellow-300 transition-colors px-4 py-2 rounded-lg"
+          style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
         >
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Volver al mapa</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Contenido principal */}
-      <div className="relative z-10 pt-32 pb-16 px-4">
+      <div className="relative z-10 pt-28 pb-16 px-4 md:px-8">
         {/* Título principal */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-4 animate-fade-in-down">
+        <div className="text-center mb-12 md:mb-16">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg mb-4 animate-fade-in-down bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
             Sistema de Gestión de Calidad
           </h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto animate-fade-in-up px-4" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
             ISO 9001:2015 - Comprometidos con la excelencia y mejora continua
           </p>
         </div>
@@ -374,43 +397,41 @@ const QualityLevel = () => {
         {/* Timeline vertical */}
         <div className="max-w-6xl mx-auto relative">
           {/* Línea central del timeline */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gradient-to-b from-purple-400 via-blue-400 to-purple-400 opacity-60 h-full rounded-full animate-timeline-draw"></div>
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gradient-to-b from-purple-500 via-blue-400 to-purple-500 opacity-70 h-full rounded-full animate-timeline-draw hidden md:block"></div>
           
           {/* Tarjetas del timeline */}
-          <div className="space-y-24">
+          <div className="space-y-20 md:space-y-24">
             {timelineData.map((item, index) => (
               <div
                 key={item.id}
-                className={`flex items-center ${item.position === 'left' ? 'justify-start' : 'justify-end'} ${item.position === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
+                className={`flex flex-col md:flex-row items-center ${item.position === 'left' ? 'md:justify-start' : 'md:justify-end'} ${item.position === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
                 style={{ 
                   animationDelay: `${0.6 + index * 0.3}s`, 
                   animationFillMode: 'both' 
                 }}
               >
                 {/* Tarjeta */}
-                <div className={`w-full md:w-5/12 ${item.position === 'right' ? 'md:mr-8' : 'md:ml-8'}`}>
-                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl cursor-pointer transition-all duration-300 hover:bg-white/15 hover:scale-105 hover:shadow-purple-500/20">
+                <div className={`w-full md:w-5/12 ${item.position === 'right' ? 'md:mr-8' : 'md:ml-8'} order-2 md:order-1`}>
+                  <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl cursor-pointer transition-all duration-300 hover:bg-white/15 hover:shadow-purple-500/20 overflow-hidden">
                     {/* Header de la tarjeta */}
-                    <div className="p-6 border-b border-white/10">
-                      <div className="flex items-center space-x-4">
-                        <div className="text-4xl">{item.emoji}</div>
+                    <div className="p-5 md:p-6 border-b border-white/10">
+                      <div className="flex items-start space-x-4">
+                        <div className="text-3xl md:text-4xl flex-shrink-0">{item.emoji}</div>
                         <div className="flex-1">
                           <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                           <p className="text-white/70 text-sm">{item.summary}</p>
                         </div>
-                        <div>
-                          <FontAwesomeIcon 
-                            icon={expandedCard === item.id ? faChevronUp : faChevronDown} 
-                            className="text-white/70"
-                          />
-                        </div>
                       </div>
                       
                       <button 
-                        className="mt-4 w-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white py-2 px-4 rounded-xl border border-white/20 hover:bg-white/20 transition-all"
+                        className="mt-4 w-full bg-gradient-to-r from-purple-600/30 to-blue-600/30 text-white py-2.5 px-4 rounded-xl border border-white/20 hover:border-white/40 transition-all flex items-center justify-center gap-2"
                         onClick={() => toggleCard(item.id)}
                       >
                         {expandedCard === item.id ? 'Cerrar detalles' : 'Ver detalles'}
+                        <FontAwesomeIcon 
+                          icon={expandedCard === item.id ? faChevronUp : faChevronDown} 
+                          className="text-white/70"
+                        />
                       </button>
                     </div>
 
@@ -422,7 +443,7 @@ const QualityLevel = () => {
                           : 'max-h-0 opacity-0'
                       }`}
                     >
-                      <div className={`p-6 space-y-6 transform transition-all duration-300 ${
+                      <div className={`p-5 md:p-6 space-y-6 transform transition-all duration-300 ${
                         expandedCard === item.id 
                           ? 'translate-y-0 opacity-100' 
                           : '-translate-y-4 opacity-0'
@@ -433,10 +454,15 @@ const QualityLevel = () => {
                               {item.content.objectives.map((obj, idx) => (
                                 <div
                                   key={idx}
-                                  className="bg-white/5 p-4 rounded-xl border border-white/10"
+                                  className="bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm"
                                 >
-                                  <h4 className="font-bold text-white mb-2">{obj.title}</h4>
-                                  <p className="text-white/80 text-sm">{obj.description}</p>
+                                  <div className="flex items-start gap-3">
+                                    <div className="text-2xl">{obj.icon}</div>
+                                    <div>
+                                      <h4 className="font-bold text-white mb-2">{obj.title}</h4>
+                                      <p className="text-white/80 text-sm">{obj.description}</p>
+                                    </div>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -446,26 +472,44 @@ const QualityLevel = () => {
                           {item.id === 2 && (
                             <div className="space-y-4">
                               <div className="text-center">
-                                <p className="text-white/80 mb-6">{item.content.description}</p>
-                                <img 
-                                  src="/img/iso9001.png" 
-                                  alt="ISO 9001:2015 Certification" 
-                                  className="max-w-xs w-full h-auto rounded-lg shadow-2xl mx-auto mb-6 animate-fade-in-up"
-                                  style={{
-                                    animationDelay: '0.3s',
-                                    animationFillMode: 'both'
-                                  }}
-                                />
+                                <div className="inline-block bg-yellow-500/10 text-yellow-300 px-3 py-1 rounded-full text-sm font-medium mb-4 border border-yellow-500/20">
+                                  Año {item.content.year}
+                                </div>
+                                <p className="text-white/80 mb-6 text-left">{item.content.description}</p>
+                                <div className="bg-white/5 p-4 rounded-2xl border border-white/10 mb-6">
+                                  <img 
+                                    src="/img/iso9001.png" 
+                                    alt="ISO 9001:2015 Certification" 
+                                    className="max-w-xs w-full h-auto rounded-lg mx-auto animate-fade-in-up"
+                                    style={{
+                                      animationDelay: '0.3s',
+                                      animationFillMode: 'both'
+                                    }}
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.nextElementSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                  <div className="hidden items-center justify-center h-40 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-white/10">
+                                    <div className="text-5xl">🏆</div>
+                                    <div className="ml-4">
+                                      <div className="font-bold text-white">ISO 9001:2015</div>
+                                      <div className="text-white/70 text-sm">Certificación de Calidad</div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                               <div>
-                                <h4 className="font-bold text-white mb-3">Beneficios obtenidos:</h4>
+                                <h4 className="font-bold text-white mb-3 flex items-center gap-2">
+                                  <span>✅</span> Beneficios obtenidos:
+                                </h4>
                                 <ul className="space-y-2">
                                   {item.content.benefits.map((benefit, idx) => (
                                     <li
                                       key={idx}
                                       className="flex items-center text-white/80 text-sm"
                                     >
-                                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3 flex-shrink-0"></div>
                                       {benefit}
                                     </li>
                                   ))}
@@ -478,34 +522,42 @@ const QualityLevel = () => {
                           {item.id === 3 && (
                             <div className="space-y-6">
                               <div>
-                                <h4 className="font-bold text-white mb-4">Prácticas Documentales:</h4>
+                                <h4 className="font-bold text-white mb-4">📋 Prácticas Documentales:</h4>
                                 <div className="grid gap-3">
                                   {item.content.documentalPractices.map((practice, idx) => (
                                     <div
                                       key={idx}
-                                      className="bg-white/5 p-3 rounded-lg border border-white/10"
+                                      className="bg-white/5 p-3 rounded-lg border border-white/10 backdrop-blur-sm"
                                     >
-                                      <h5 className="font-semibold text-white text-sm mb-1">{practice.category}</h5>
-                                      <p className="text-white/70 text-xs">{practice.description}</p>
+                                      <div className="flex items-start gap-2">
+                                        <div className="text-lg">{practice.icon}</div>
+                                        <div>
+                                          <h5 className="font-semibold text-white text-sm mb-1">{practice.category}</h5>
+                                          <p className="text-white/70 text-xs">{practice.description}</p>
+                                        </div>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
                               </div>
                               
-                              <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <h4 className="font-bold text-white mb-3">Estándares Tipográficos:</h4>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                  <div className="text-white/80">
-                                    <span className="font-semibold">Tipografía:</span> {item.content.typography.font}
+                              <div className="bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                                <h4 className="font-bold text-white mb-3">🔤 Estándares Tipográficos:</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                  <div className="text-white/80 flex items-center">
+                                    <span className="font-semibold min-w-[120px]">Tipografía:</span> {item.content.typography.font}
                                   </div>
-                                  <div className="text-white/80">
-                                    <span className="font-semibold">Tamaño texto:</span> {item.content.typography.textSize}
+                                  <div className="text-white/80 flex items-center">
+                                    <span className="font-semibold min-w-[120px]">Tamaño texto:</span> {item.content.typography.textSize} pt
                                   </div>
-                                  <div className="text-white/80">
-                                    <span className="font-semibold">Títulos:</span> {item.content.typography.titleSize}
+                                  <div className="text-white/80 flex items-center">
+                                    <span className="font-semibold min-w-[120px]">Títulos:</span> {item.content.typography.titleSize} pt
                                   </div>
-                                  <div className="text-white/80">
-                                    <span className="font-semibold">Interlineado:</span> {item.content.typography.lineHeight}
+                                  <div className="text-white/80 flex items-center">
+                                    <span className="font-semibold min-w-[120px]">Interlineado:</span> {item.content.typography.lineHeight}
+                                  </div>
+                                  <div className="text-white/80 flex items-center md:col-span-2">
+                                    <span className="font-semibold min-w-[120px]">Color:</span> {item.content.typography.color}
                                   </div>
                                 </div>
                               </div>
@@ -518,14 +570,14 @@ const QualityLevel = () => {
 
                 {/* Nodo del timeline */}
                 <div 
-                  className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full border-4 border-white/20 shadow-lg z-10 animate-scale-in"
+                  className="relative md:absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full border-4 border-white/20 shadow-lg z-10 animate-scale-in order-1 md:order-2 mb-4 md:mb-0"
                   style={{ 
                     animationDelay: `${0.8 + index * 0.3}s`, 
                     animationFillMode: 'both' 
                   }}
                 >
-                  <div className="w-full h-full rounded-full bg-white/30 flex items-center justify-center">
-                    <FontAwesomeIcon icon={item.icon} className="text-white text-xs" />
+                  <div className="w-full h-full rounded-full bg-white/20 flex items-center justify-center">
+                    <FontAwesomeIcon icon={item.icon} className="text-white text-sm" />
                   </div>
                 </div>
               </div>
@@ -537,7 +589,7 @@ const QualityLevel = () => {
         <div className="text-center mt-16">
           <button
             onClick={() => setShowGame(true)}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse-soft"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse-soft flex items-center justify-center gap-2 mx-auto text-lg"
             style={{ 
               animationDelay: '2s', 
               animationFillMode: 'both' 
@@ -554,42 +606,8 @@ const QualityLevel = () => {
       {/* Animaciones personalizadas */}
       <style>{`
         @keyframes star-pulse {
-          0%, 100% { opacity: 0.3; transform: scale(0.5); }
-          50% { opacity: 1; transform: scale(1.5); }
-        }
-        
-        @keyframes slideInFromTop {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes slideOutToTop {
-          from {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          to {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-        }
-        
-        .animate-star-pulse {
-          animation: star-pulse 3s infinite;
-        }
-        
-        .animate-slide-in {
-          animation: slideInFromTop 0.3s ease-out forwards;
-        }
-        
-        .animate-slide-out {
-          animation: slideOutToTop 0.3s ease-in forwards;
+          0%, 100% { opacity: 0.3; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
         }
         
         @keyframes fadeInUp {
@@ -674,7 +692,7 @@ const QualityLevel = () => {
           }
           to {
             height: 100%;
-            opacity: 0.6;
+            opacity: 0.7;
           }
         }
         
@@ -691,8 +709,17 @@ const QualityLevel = () => {
           animation: pulseSoft 2s ease-in-out infinite;
         }
         
-        @media (max-width: 768px) {
-          .font-[Calibri] { font-family: 'Calibri', Arial, sans-serif; }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-out;
         }
       `}</style>
     </div>

@@ -6,12 +6,15 @@ import {
   faCheckCircle, 
   faTimesCircle, 
   faTrophy, 
-  faRedo 
+  faRedo,
+  faUsers,
+  faChartLine,
+  faBullseye,
+  faLightbulb
 } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
 
-// Org structure and challenges array should be at the top level inside the component
 const challenges = [
   {
     id: 'organigrama',
@@ -80,96 +83,111 @@ const challenges = [
 ];
 
 const HierarchyDragDrop = ({ onComplete }) => {
-  // Secciones para Director General y Director de Operaciones
   const directorGeneralId = 'director-general';
   const directorOperacionesId = 'director-operaciones';
   const ceoId = 'ceo';
-  // Cargos subordinados directos de cada director
+
   const cargosDirectorGeneral = challenges[0].structure[directorGeneralId].children.map(
     id => challenges[0].positions.find(pos => pos.id === id)
   ).filter(Boolean);
+  
   const cargosDirectorOperaciones = challenges[0].structure[directorOperacionesId].children.map(
     id => challenges[0].positions.find(pos => pos.id === id)
   ).filter(Boolean);
-  // Estado para cada sección
+
   const [stateDG, setStateDG] = useState({
     availablePositions: cargosDirectorGeneral,
     placedPositions: {}
   });
+  
   const [stateDO, setStateDO] = useState({
     availablePositions: cargosDirectorOperaciones,
     placedPositions: {}
   });
 
-  // Cargos subordinados directos de cada director
+  const [selectingSub, setSelectingSub] = useState(null);
+  const [selectedSub, setSelectedSub] = useState({});
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [showResults, setShowResults] = useState(false);
 
-  // Estado para cada sección
+  const navigate = useNavigate();
+  const { completeLevel } = useAppContext();
 
-  // Calcular aciertos en DG
-  function getDGCorrectCount() {
+  const getDGCorrectCount = () => {
     let count = 0;
+    // Contar cargos principales colocados correctamente
     Object.entries(stateDG.placedPositions).forEach(([nodeId, arr]) => {
       arr.forEach((pos, idx) => {
         const correctOrder = challenges[0].structure[nodeId]?.children?.[idx] === pos.id;
         if (pos.correctParent === nodeId && correctOrder) count++;
       });
     });
+    
+    // Contar subordinados seleccionados correctamente
+    Object.entries(selectedSub).forEach(([positionId, subordinate]) => {
+      if (subordinate && subordinate.isCorrect) {
+        count++;
+      }
+    });
+    
     return count;
-  }
-  // Calcular aciertos en DO
-  function getDOCorrectCount() {
+  };
+
+  const getDOCorrectCount = () => {
     let count = 0;
+    // Contar cargos principales colocados correctamente
     Object.entries(stateDO.placedPositions).forEach(([nodeId, arr]) => {
       arr.forEach((pos, idx) => {
         const correctOrder = challenges[0].structure[nodeId]?.children?.[idx] === pos.id;
         if (pos.correctParent === nodeId && correctOrder) count++;
       });
     });
+    
+    // Contar subordinados seleccionados correctamente (los subordinados están relacionados con cargos de ambas secciones)
+    // Por ahora no agregamos aquí porque selectedSub es global y ya se cuenta en getDGCorrectCount
+    
     return count;
-  }
+  };
 
-  // Total de cargos a colocar: solo los disponibles para cada sección
-
-  // Total de cargos a colocar: solo los disponibles para cada sección
+  // Calcular total de elementos que se deben colocar/seleccionar correctamente
   const totalDG = cargosDirectorGeneral.length;
   const totalDO = cargosDirectorOperaciones.length;
-  // Progreso por aciertos
+  
+  // Contar cuántos cargos tienen subordinados que se deben seleccionar
+  const cargosConSubordinados = [];
+  [...cargosDirectorGeneral, ...cargosDirectorOperaciones].forEach(cargo => {
+    if (challenges[0].structure[cargo.id]?.children?.length > 0) {
+      cargosConSubordinados.push(cargo.id);
+    }
+  });
+  
   const aciertos = getDGCorrectCount() + getDOCorrectCount();
-  const totalAciertos = totalDG + totalDO;
+  const totalAciertos = totalDG + totalDO + cargosConSubordinados.length;
   const progress = totalAciertos > 0 ? (aciertos / totalAciertos) * 100 : 0;
-  const navigate = useNavigate()
-  const { completeLevel } = useAppContext()
-  const [currentChallenge, setCurrentChallenge] = useState(0)
-  const [challengeResults, setChallengeResults] = useState([])
-  const [completedChallenges, setCompletedChallenges] = useState([])
-  const [showResults, setShowResults] = useState(false)
 
-  // State for drag & drop positions
-  const [currentState, setCurrentState] = useState({
-    availablePositions: challenges[currentChallenge].positions.map(pos => ({ ...pos })),
-    placedPositions: {}
-  })
-
-
-  // Handler para drag over
   const handleDragOver = (e) => {
     e.preventDefault();
   };
 
-  // Adaptar funciones para drag & drop por sección
   const handleDragStart = (e, position, state, setState) => {
     e.dataTransfer.setData('positionId', position.id);
+    setDraggedItem(position);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
   };
 
   const handleDrop = (e, nodeId, state, setState) => {
     e.preventDefault();
     const positionId = e.dataTransfer.getData('positionId');
     if (!positionId) return;
-    // Evitar duplicados
+    
     if (state.placedPositions[nodeId]?.some(pos => pos.id === positionId)) return;
-    // Buscar el cargo en toda la lista de disponibles
+    
     const position = state.availablePositions.find(pos => pos.id === positionId);
     if (!position) return;
+    
     setState({
       availablePositions: state.availablePositions.filter(pos => pos.id !== positionId),
       placedPositions: {
@@ -177,6 +195,7 @@ const HierarchyDragDrop = ({ onComplete }) => {
         [nodeId]: [...(state.placedPositions[nodeId] || []), position]
       }
     });
+    setDraggedItem(null);
   };
 
   const handleRemovePosition = (positionId, nodeId, state, setState) => {
@@ -191,104 +210,36 @@ const HierarchyDragDrop = ({ onComplete }) => {
   };
 
   const resetChallenge = () => {
-    setCurrentState({
-      availablePositions: challenges[currentChallenge].positions.map(pos => ({ ...pos })),
+    setStateDG({
+      availablePositions: cargosDirectorGeneral,
       placedPositions: {}
-    })
-  }
-  const checkChallenge = () => {
-    // Implement check logic here
-  }
+    });
+    setStateDO({
+      availablePositions: cargosDirectorOperaciones,
+      placedPositions: {}
+    });
+    setSelectedSub({});
+  };
 
-  const renderDropZone = (nodeId, level = 1) => {
-    const node = challenges[0].structure[nodeId]
-    if (!node) return null
-
-    const placedHere = currentState.placedPositions[nodeId] || []
-    const isDirector = level === 1
-
-    return (
-      <div key={nodeId} className={`mb-4 ${level > 1 ? 'ml-8' : ''}`}>
-        <div
-          className={`relative ${isDirector ? `bg-gradient-to-r ${challenges[0].director.color} text-white` : 'bg-gray-100 border-2 border-dashed border-gray-300'} rounded-lg p-4 min-h-[80px] transition-all duration-300`}
-          onDragOver={!isDirector ? handleDragOver : undefined}
-          onDrop={!isDirector ? (e) => handleDrop(e, nodeId) : undefined}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h4 className={`font-bold text-sm ${isDirector ? 'text-white' : 'text-gray-700'}`}>
-              {node.name}
-            </h4>
-            {isDirector && (
-              <div className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">
-                FIJO
-              </div>
-            )}
-          </div>
-
-          {!isDirector && (
-            <div className="space-y-2">
-              {placedHere.map(position => (
-                <div
-                  key={position.id}
-                  className={`bg-white rounded-lg p-2 shadow-sm border-l-4 ${
-                    position.correctParent === nodeId ? 'border-green-500' : 'border-red-500'
-                  } cursor-pointer hover:shadow-md transition-shadow`}
-                  onClick={() => handleRemovePosition(position.id, nodeId)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      {position.name}
-                    </span>
-                    <FontAwesomeIcon 
-                      icon={position.correctParent === nodeId ? faCheckCircle : faTimesCircle}
-                      className={`text-sm ${position.correctParent === nodeId ? 'text-green-500' : 'text-red-500'}`}
-                    />
-                  </div>
-                  {/* Si el cargo tiene hijos, renderiza su dropzone para los subordinados */}
-                  {challenges[0].structure[position.id]?.children?.length > 0 && (
-                    <div className="mt-4 ml-6">
-                      {renderDropZone(position.id, level + 1)}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {placedHere.length === 0 && (
-                <div className="text-center text-gray-400 text-sm py-4">
-                  Arrastra aquí los cargos subordinados
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Renderizar nodos hijos */}
-        {node.children.map(childId => renderDropZone(childId, level + 1))}
-      </div>
-    )
-  }
-  // Dropzone sin título para los subordinados
   const renderDropZoneSinTitulo = (nodeId, state, setState, level = 1) => {
-  // Agrupaciones genéricas para nomina y administración de personal
-  const hijosJefeNominaIds = challenges[0].structure['jefe-nomina'].children;
-  const hijosLiderAdministracionPersonalIds = challenges[0].structure['lider-administracion-personal'].children;
+    const hijosJefeNominaIds = challenges[0].structure['jefe-nomina'].children;
+    const hijosLiderAdministracionPersonalIds = challenges[0].structure['lider-administracion-personal'].children;
     const node = challenges[0].structure[nodeId];
     if (!node) return null;
+    
     const placedHere = state.placedPositions[nodeId] || [];
     const isDirector = level === 1 || level === 2;
-  // Estado local para selector de subordinado
-  const [selectingSub, setSelectingSub] = useState(null);
-  const [selectedSub, setSelectedSub] = useState({});
-    // Todas las opciones posibles: hijos de todos los cargos con subordinados
+
     const hijosLiderGestionHumana = challenges[0].structure['lider-gestion-humana'].children.map(id => challenges[0].positions.find(pos => pos.id === id)).filter(Boolean);
     const hijosAsistenteAdministrativoFinanciero = challenges[0].structure['asistente-administrativo-financiero'].children.map(id => challenges[0].positions.find(pos => pos.id === id)).filter(Boolean);
     const hijosJefeNomina = challenges[0].structure['jefe-nomina'].children.map(id => challenges[0].positions.find(pos => pos.id === id)).filter(Boolean);
     const hijosLiderEOR = challenges[0].structure['lider-eor'].children.map(id => challenges[0].positions.find(pos => pos.id === id)).filter(Boolean);
     const hijosLiderAdministracionPersonal = challenges[0].structure['lider-administracion-personal'].children.map(id => challenges[0].positions.find(pos => pos.id === id)).filter(Boolean);
     const hijosLiderOutsourcingTesoreria = challenges[0].structure['lider-outsourcing-tesoreria'].children.map(id => challenges[0].positions.find(pos => pos.id === id)).filter(Boolean);
+    
     const todasOpciones = [
       ...hijosLiderGestionHumana,
       ...hijosAsistenteAdministrativoFinanciero,
-      // Agrupación para nomina
       {
         id: 'nomina-group',
         name: 'Cargos relacionados a nómina',
@@ -298,7 +249,6 @@ const HierarchyDragDrop = ({ onComplete }) => {
         children: hijosJefeNominaIds
       },
       ...hijosLiderEOR,
-      // Agrupación para administración de personal
       {
         id: 'admin-personal-group',
         name: 'Cargos relacionados a administración de personal',
@@ -309,250 +259,575 @@ const HierarchyDragDrop = ({ onComplete }) => {
       },
       ...hijosLiderOutsourcingTesoreria
     ];
+    
+    const isCeo = nodeId === 'ceo';
+    
     return (
-      <div key={nodeId} className={`mb-4 ${level > 1 ? 'ml-8' : ''}`}>
+      <motion.div 
+        key={nodeId} 
+        className={`mb-6 ${level > 1 ? 'ml-8' : ''}`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <div
-          className={`relative ${isDirector ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'bg-gray-100 border-2 border-dashed border-gray-300'} rounded-lg p-4 min-h-[80px] transition-all duration-300`}
-          onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, nodeId, state, setState)}
+          className={`relative overflow-hidden ${
+            isDirector 
+              ? 'bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 text-white shadow-xl' 
+              : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-gradient-to-br hover:from-purple-50 hover:to-purple-100'
+          } rounded-2xl p-6 min-h-[100px] transition-all duration-500 ${
+            isCeo ? 'opacity-90' : ''
+          } ${draggedItem ? 'transform hover:scale-[1.02]' : ''}`}
+          onDragOver={!isCeo ? handleDragOver : undefined}
+          onDrop={!isCeo ? (e) => handleDrop(e, nodeId, state, setState) : undefined}
         >
+          {/* Decorative elements for director cards */}
           {isDirector && (
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-bold text-sm text-white">{node.name}</h4>
-              <div className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">FIJO</div>
+            <>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white bg-opacity-5 rounded-full -ml-12 -mb-12"></div>
+            </>
+          )}
+          
+          {isDirector && (
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <FontAwesomeIcon icon={faUsers} className="text-white text-xl" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg text-white">{node.name}</h4>
+                  <p className="text-purple-100 text-sm">Nivel {node.level}</p>
+                </div>
+              </div>
+              <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                FIJO
+              </div>
             </div>
           )}
-          <div className="space-y-2">
-            {placedHere.map((position, idx) => {
-              const correctOrder = challenges[0].structure[nodeId]?.children?.[idx] === position.id;
-              const isCorrect = position.correctParent === nodeId && correctOrder;
-              const hasSubordinates = challenges[0].structure[position.id]?.children?.length > 0;
-              return (
-                <div
-                  key={position.id}
-                  className={`bg-white rounded-lg p-2 shadow-sm border-l-4 ${
-                    isCorrect ? 'border-green-500' : 'border-red-500'
-                  } cursor-pointer hover:shadow-md transition-shadow`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      {position.name}
-                    </span>
-                    <span className="text-xs text-gray-500 ml-2">Nivel {position.level}</span>
-                    <FontAwesomeIcon 
-                      icon={isCorrect ? faCheckCircle : faTimesCircle}
-                      className={`text-sm ml-2 ${isCorrect ? 'text-green-500' : 'text-red-500'}`}
-                    />
-                    {/* Botón para eliminar cargo principal */}
-                    <button className="ml-2 text-xs text-red-400 hover:text-red-600" onClick={(e) => {e.stopPropagation(); handleRemovePosition(position.id, nodeId, state, setState);}}>Quitar</button>
-                  </div>
-                  {/* Si el cargo tiene hijos, mostrar selector en vez de dropzone recursivo */}
-                  {hasSubordinates && (
-                    <div className="mt-4 ml-6">
-                      {!selectedSub[position.id] ? (
-                        <div className="bg-gray-100 border border-dashed border-gray-400 rounded p-2 cursor-pointer text-gray-500 text-sm" onClick={(e) => {e.stopPropagation(); setSelectingSub(position.id);}}>
-                          Da clic y escoge al subordinado
-                        </div>
-                      ) : (
-                        <div className={`bg-white rounded-lg p-2 shadow-sm border-l-4 ${
-                          selectedSub[position.id].isCorrect ? 'border-green-500' : 'border-red-500'
-                        } flex items-center justify-between cursor-pointer`} onClick={(e) => {e.stopPropagation(); setSelectingSub(position.id);}}>
-                          <span className="text-sm font-medium text-gray-700">
-                            {selectedSub[position.id].name}
-                          </span>
-                          <span className="text-xs text-gray-500 ml-2">Nivel {selectedSub[position.id].level}</span>
+          
+          <div className="space-y-3 relative z-10">
+            <AnimatePresence>
+              {placedHere.map((position, idx) => {
+                const correctOrder = challenges[0].structure[nodeId]?.children?.[idx] === position.id;
+                const isCorrect = position.correctParent === nodeId && correctOrder;
+                const hasSubordinates = challenges[0].structure[position.id]?.children?.length > 0;
+                
+                return (
+                  <motion.div
+                    key={position.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3 }}
+                    className={`bg-white rounded-xl p-4 shadow-lg border-l-4 ${
+                      isCorrect ? 'border-green-500 bg-gradient-to-r from-green-50 to-green-100' : 'border-red-500 bg-gradient-to-r from-red-50 to-red-100'
+                    } cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          isCorrect ? 'bg-green-500' : 'bg-red-500'
+                        }`}>
                           <FontAwesomeIcon 
-                            icon={selectedSub[position.id].isCorrect ? faCheckCircle : faTimesCircle}
-                            className={`text-sm ml-2 ${selectedSub[position.id].isCorrect ? 'text-green-500' : 'text-red-500'}`}
+                            icon={isCorrect ? faCheckCircle : faTimesCircle}
+                            className="text-white"
                           />
                         </div>
-                      )}
-                      {/* Menú de selección de subordinado: mostrar todas las opciones posibles */}
-                      {selectingSub === position.id && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                          <div className="bg-white border rounded-xl shadow-2xl p-6 max-w-xs w-full">
-                            <h4 className="text-lg font-bold text-gray-800 mb-4 text-center">Escoge el subordinado</h4>
-                            <div className="space-y-2">
-                              {todasOpciones.map(child => (
-                                <div key={child.id} className="cursor-pointer hover:bg-gray-100 p-2 rounded text-gray-700 text-center" onClick={(e) => {
-                                  e.stopPropagation();
-                                  let isCorrect;
-                                  if (child.isGroup) {
-                                    isCorrect = child.correctParent === position.id;
-                                  } else {
-                                    isCorrect = child.correctParent === position.id;
-                                  }
-                                  setSelectedSub(prev => ({
-                                    ...prev,
-                                    [position.id]: {
-                                      ...child,
-                                      isCorrect
-                                    }
-                                  }));
-                                  setSelectingSub(null);
-                                }}>{child.name} <span className="text-xs text-gray-400">{child.level ? `Nivel ${child.level}` : ''}</span></div>
-                              ))}
-                            </div>
-                            <button className="mt-6 w-full bg-gray-200 text-gray-700 py-2 rounded font-bold" onClick={() => setSelectingSub(null)}>Cancelar</button>
-                          </div>
+                        <div>
+                          <span className="text-sm font-semibold text-gray-800">
+                            {position.name}
+                          </span>
+                          <p className="text-xs text-gray-500">Nivel {position.level}</p>
                         </div>
-                      )}
+                      </div>
+                      <button 
+                        className="px-3 py-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium" 
+                        onClick={(e) => {
+                          e.stopPropagation(); 
+                          handleRemovePosition(position.id, nodeId, state, setState);
+                        }}
+                      >
+                        Quitar
+                      </button>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-            {placedHere.length === 0 && (
-              <div className="text-center text-gray-400 text-sm py-4">
-                {/* Solo el área vacía, sin título */}
+                    
+                    {hasSubordinates && (
+                      <div className="mt-6 ml-6">
+                        {!selectedSub[position.id] ? (
+                          <motion.div 
+                            className="bg-gradient-to-r from-gray-100 to-gray-200 border-2 border-dashed border-gray-400 rounded-xl p-4 cursor-pointer text-gray-600 text-sm font-medium hover:from-purple-100 hover:to-purple-200 hover:border-purple-400 transition-all duration-300" 
+                            onClick={(e) => {e.stopPropagation(); setSelectingSub(position.id);}}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <div className="flex items-center justify-center space-x-2">
+                              <FontAwesomeIcon icon={faLightbulb} className="text-purple-500" />
+                              <span>Clic para escoger subordinado</span>
+                            </div>
+                          </motion.div>
+                        ) : (
+                          <motion.div 
+                            className={`bg-white rounded-xl p-4 shadow-lg border-l-4 ${
+                              selectedSub[position.id].isCorrect ? 'border-green-500 bg-gradient-to-r from-green-50 to-green-100' : 'border-red-500 bg-gradient-to-r from-red-50 to-red-100'
+                            } flex items-center justify-between cursor-pointer hover:shadow-xl transition-all duration-300`} 
+                            onClick={(e) => {e.stopPropagation(); setSelectingSub(position.id);}}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                                selectedSub[position.id].isCorrect ? 'bg-green-500' : 'bg-red-500'
+                              }`}>
+                                <FontAwesomeIcon 
+                                  icon={selectedSub[position.id].isCorrect ? faCheckCircle : faTimesCircle}
+                                  className="text-white text-sm"
+                                />
+                              </div>
+                              <div>
+                                <span className="text-sm font-medium text-gray-700">
+                                  {selectedSub[position.id].name}
+                                </span>
+                                <p className="text-xs text-gray-500">Nivel {selectedSub[position.id].level}</p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                        
+                        <AnimatePresence>
+                          {selectingSub === position.id && (
+                            <motion.div 
+                              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                            >
+                              <motion.div 
+                                className="bg-white border rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4"
+                                initial={{ scale: 0.8, y: 50 }}
+                                animate={{ scale: 1, y: 0 }}
+                                exit={{ scale: 0.8, y: 50 }}
+                                transition={{ type: "spring", damping: 20 }}
+                              >
+                                <div className="text-center mb-6">
+                                  <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <FontAwesomeIcon icon={faBullseye} className="text-purple-600 text-2xl" />
+                                  </div>
+                                  <h4 className="text-2xl font-bold text-gray-800">Escoge el subordinado</h4>
+                                  <p className="text-gray-600 mt-2">Selecciona la posición correcta</p>
+                                </div>
+                                
+                                <div className="space-y-3 max-h-80 overflow-y-auto">
+                                  {todasOpciones.map(child => (
+                                    <motion.div 
+                                      key={child.id} 
+                                      className="cursor-pointer hover:bg-purple-50 p-4 rounded-xl text-gray-700 border border-gray-200 hover:border-purple-300 transition-all duration-200" 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        let isCorrect;
+                                        if (child.isGroup) {
+                                          isCorrect = child.correctParent === position.id;
+                                        } else {
+                                          isCorrect = child.correctParent === position.id;
+                                        }
+                                        setSelectedSub(prev => ({
+                                          ...prev,
+                                          [position.id]: {
+                                            ...child,
+                                            isCorrect
+                                          }
+                                        }));
+                                        setSelectingSub(null);
+                                      }}
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                    >
+                                      <div className="font-medium">{child.name}</div>
+                                      {child.level && (
+                                        <div className="text-sm text-gray-500 mt-1">Nivel {child.level}</div>
+                                      )}
+                                    </motion.div>
+                                  ))}
+                                </div>
+                                
+                                <button 
+                                  className="mt-6 w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-xl font-semibold hover:from-gray-600 hover:to-gray-700 transition-all duration-200" 
+                                  onClick={() => setSelectingSub(null)}
+                                >
+                                  Cancelar
+                                </button>
+                              </motion.div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+            
+            {placedHere.length === 0 && isDirector && (nodeId === 'director-general' || nodeId === 'director-operaciones') && (
+              <motion.div 
+                className="text-center text-purple-200 text-lg py-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <FontAwesomeIcon icon={faChartLine} className="text-4xl mb-4" />
+                <div className="font-medium">Arrastra y organiza los cargos subordinados</div>
+                <div className="text-sm mt-2">en el orden correcto de jerarquía</div>
+              </motion.div>
+            )}
+            
+            {placedHere.length === 0 && (!isDirector || (nodeId !== 'director-general' && nodeId !== 'director-operaciones')) && (
+              <div className="text-center text-gray-400 text-sm py-6">
+                {/* Zona de drop vacía */}
               </div>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     );
-  } 
-
+  };
 
   return (
-  <div className="space-y-6">
-      {/* Barra de progreso */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-800">
-            Desafío {currentChallenge + 1} de {challenges.length}: {challenges[currentChallenge].title}
-          </h3>
-          <div className="text-sm text-gray-600">
-            {Math.round(progress)}% Aciertos
-          </div>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
-          <div
-            className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
-            style={{ width: `${progress}%`, transition: 'width 0.5s' }}
-          />
-        </div>
-        <div className="flex justify-center mt-6">
-          <button
-            className={`bg-gradient-to-r from-purple-500 to-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300 ${progress === 100 ? 'hover:from-purple-600 hover:to-purple-800' : 'opacity-50 cursor-not-allowed'}`}
-            disabled={progress !== 100}
-            onClick={() => {
-              if (progress === 100) {
-                completeLevel(4);
-                setShowResults(false);
-                navigate('/achievement/4');
-              }
-            }}
-          >
-            Reclamar Insignia
-          </button>
-        </div>
-      </div>
-      {/* Sección 1: Director General */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h4 className="text-lg font-bold text-gray-800">Cargos Disponibles (Director General)</h4>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {stateDG.availablePositions.map(position => (
-              <div
-                key={position.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, position, stateDG, setStateDG)}
-                className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 rounded-lg p-3 cursor-move hover:shadow-md transition-all duration-200 border"
-              >
-                <div className="flex items-center space-x-3">
-                  <FontAwesomeIcon icon={faGripVertical} className="text-gray-400" />
-                  <div>
-                    <div className="font-medium text-sm text-gray-800">{position.name}</div>
-                    <div className="text-xs text-gray-500">{`Nivel ${position.level}`}</div>
-                  </div>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-6 rounded-3xl">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header and Progress Section */}
+        <motion.div 
+          className="bg-white rounded-3xl shadow-xl p-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+            <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faUsers} className="text-white text-2xl" />
               </div>
-            ))}
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Estructura Organizacional (Director General)</h4>
-          <div className="space-y-4">
-            {renderDropZoneSinTitulo(ceoId, stateDG, setStateDG)}
-            {renderDropZoneSinTitulo(directorGeneralId, stateDG, setStateDG, 2)}
-          </div>
-        </div>
-      </div>
-      {/* Sección 2: Director de Operaciones */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h4 className="text-lg font-bold text-gray-800">Cargos Disponibles (Director de Operaciones)</h4>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {stateDO.availablePositions.map(position => (
-              <div
-                key={position.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, position, stateDO, setStateDO)}
-                className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200 rounded-lg p-3 cursor-move hover:shadow-md transition-all duration-200 border"
-              >
-                <div className="flex items-center space-x-3">
-                  <FontAwesomeIcon icon={faGripVertical} className="text-gray-400" />
-                  <div>
-                    <div className="font-medium text-sm text-gray-800">{position.name}</div>
-                    <div className="text-xs text-gray-500">{`Nivel ${position.level}`}</div>
-                  </div>
-                </div>
+              <div>
+                <h3 className="text-3xl font-bold text-gray-800">
+                  {challenges[0].title}
+                </h3>
+                <p className="text-gray-600 mt-1">Organiza la estructura jerárquica correctamente</p>
               </div>
-            ))}
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-600 mb-2">Progreso de Aciertos</div>
+              <div className="text-3xl font-bold text-purple-600">
+                {Math.round(progress)}%
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h4 className="text-lg font-bold text-gray-800 mb-4">Estructura Organizacional (Director de Operaciones)</h4>
-          <div className="space-y-4">
-            {renderDropZoneSinTitulo(ceoId, stateDO, setStateDO)}
-            {renderDropZoneSinTitulo(directorOperacionesId, stateDO, setStateDO, 2)}
+          
+          <div className="relative">
+            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+              <motion.div
+                className="bg-gradient-to-r from-green-400 via-green-500 to-green-600 h-4 rounded-full shadow-lg"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
           </div>
-        </div>
+          
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-8">
+            <motion.button
+              className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+              onClick={resetChallenge}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FontAwesomeIcon icon={faRedo} />
+              <span>Reiniciar Desafío</span>
+            </motion.button>
+            
+            <motion.button
+              className={`px-8 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg ${
+                progress === 100 
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:from-purple-600 hover:to-purple-800' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              disabled={progress !== 100}
+              onClick={() => {
+                if (progress === 100) {
+                  completeLevel(4);
+                  setShowResults(false);
+                  navigate('/achievement/4');
+                }
+              }}
+              whileHover={progress === 100 ? { scale: 1.05 } : {}}
+              whileTap={progress === 100 ? { scale: 0.95 } : {}}
+            >
+              <FontAwesomeIcon icon={faTrophy} />
+              <span>Reclamar Insignia</span>
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Director General Section */}
+        <motion.div 
+          className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faGripVertical} className="text-white" />
+              </div>
+              <div>
+                <h4 className="text-2xl font-bold text-gray-800">Cargos Disponibles</h4>
+                <p className="text-gray-600">Director General ({stateDG.availablePositions.length})</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+              <AnimatePresence>
+                {stateDG.availablePositions.map((position, index) => (
+                  <motion.div
+                    key={position.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, position, stateDG, setStateDG)}
+                    onDragEnd={handleDragEnd}
+                    className={`bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl p-4 cursor-move hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${
+                      draggedItem?.id === position.id ? 'opacity-50 scale-95' : 'hover:scale-105'
+                    }`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileDrag={{ scale: 1.05, zIndex: 1000 }}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <FontAwesomeIcon icon={faGripVertical} className="text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-800 text-sm">{position.name}</div>
+                        <div className="text-xs text-gray-500 mt-1 flex items-center space-x-2">
+                          <span>Nivel {position.level}</span>
+                          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                          <span className="text-purple-600 font-medium">Arrastra para colocar</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              
+              {stateDG.availablePositions.length === 0 && (
+                <motion.div 
+                  className="text-center py-12 text-gray-400"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-6xl mb-4 text-green-400" />
+                  <p className="text-lg font-medium">¡Todos los cargos han sido colocados!</p>
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faChartLine} className="text-white" />
+              </div>
+              <div>
+                <h4 className="text-2xl font-bold text-gray-800">Estructura Organizacional</h4>
+                <p className="text-gray-600">Director General</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+              {renderDropZoneSinTitulo(ceoId, stateDG, setStateDG)}
+              {renderDropZoneSinTitulo(directorGeneralId, stateDG, setStateDG, 2)}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Director de Operaciones Section */}
+        <motion.div 
+          className="grid grid-cols-1 xl:grid-cols-2 gap-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faGripVertical} className="text-white" />
+              </div>
+              <div>
+                <h4 className="text-2xl font-bold text-gray-800">Cargos Disponibles</h4>
+                <p className="text-gray-600">Director de Operaciones ({stateDO.availablePositions.length})</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+              <AnimatePresence>
+                {stateDO.availablePositions.map((position, index) => (
+                  <motion.div
+                    key={position.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, position, stateDO, setStateDO)}
+                    onDragEnd={handleDragEnd}
+                    className={`bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-4 cursor-move hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${
+                      draggedItem?.id === position.id ? 'opacity-50 scale-95' : 'hover:scale-105'
+                    }`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileDrag={{ scale: 1.05, zIndex: 1000 }}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <FontAwesomeIcon icon={faGripVertical} className="text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-800 text-sm">{position.name}</div>
+                        <div className="text-xs text-gray-500 mt-1 flex items-center space-x-2">
+                          <span>Nivel {position.level}</span>
+                          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                          <span className="text-blue-600 font-medium">Arrastra para colocar</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              
+              {stateDO.availablePositions.length === 0 && (
+                <motion.div 
+                  className="text-center py-12 text-gray-400"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-6xl mb-4 text-green-400" />
+                  <p className="text-lg font-medium">¡Todos los cargos han sido colocados!</p>
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-700 rounded-xl flex items-center justify-center">
+                <FontAwesomeIcon icon={faChartLine} className="text-white" />
+              </div>
+              <div>
+                <h4 className="text-2xl font-bold text-gray-800">Estructura Organizacional</h4>
+                <p className="text-gray-600">Director de Operaciones</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+              {renderDropZoneSinTitulo(ceoId, stateDO, setStateDO)}
+              {renderDropZoneSinTitulo(directorOperacionesId, stateDO, setStateDO, 2)}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Results Modal */}
+        <AnimatePresence>
+          {showResults && (
+            <motion.div 
+              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div 
+                className="bg-white rounded-3xl p-10 max-w-md w-full mx-4 text-center"
+                initial={{ scale: 0.8, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 50 }}
+                transition={{ type: "spring", damping: 20 }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", damping: 15 }}
+                >
+                  <FontAwesomeIcon icon={faTrophy} className="text-8xl text-yellow-500 mb-6" />
+                </motion.div>
+                <h3 className="text-3xl font-bold text-green-600 mb-4">¡Excelente!</h3>
+                <p className="text-gray-600 mb-6 text-lg">¡Bien hecho! Has completado todos los desafíos de organización jerárquica</p>
+                <div className="text-4xl font-bold text-green-600 mb-8">{Math.round(progress)}%</div>
+                <motion.button
+                  onClick={() => {
+                    completeLevel(4);
+                    setShowResults(false);
+                    setTimeout(() => {
+                      navigate('/achievement/4');
+                    }, 300);
+                  }}
+                  className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-purple-600 hover:to-purple-800 transition-all duration-300 shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Reclamar Insignia
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Stats Section */}
+        <motion.div 
+          className="bg-white rounded-3xl shadow-xl p-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <h4 className="text-2xl font-bold text-gray-800 mb-6 text-center">Estadísticas del Desafío</h4>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl">
+              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FontAwesomeIcon icon={faCheckCircle} className="text-white text-2xl" />
+              </div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{aciertos}</div>
+              <div className="text-sm text-gray-600">Aciertos Totales</div>
+            </div>
+            
+            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl">
+              <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FontAwesomeIcon icon={faBullseye} className="text-white text-2xl" />
+              </div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{totalAciertos}</div>
+              <div className="text-sm text-gray-600">Total Posiciones</div>
+            </div>
+            
+            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl">
+              <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FontAwesomeIcon icon={faUsers} className="text-white text-2xl" />
+              </div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">{getDGCorrectCount()}</div>
+              <div className="text-sm text-gray-600">Aciertos Dir. General</div>
+            </div>
+            
+            <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl">
+              <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FontAwesomeIcon icon={faChartLine} className="text-white text-2xl" />
+              </div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">{getDOCorrectCount()}</div>
+              <div className="text-sm text-gray-600">Aciertos Dir. Operaciones</div>
+            </div>
+          </div>
+        </motion.div>
       </div>
-      {/* Modal de resultados */}
-      {showResults && challengeResults.length > 0 && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center">
-            {challengeResults[challengeResults.length - 1]?.isComplete ? (
-              <>
-                <FontAwesomeIcon icon={faTrophy} className="text-6xl text-yellow-500 mb-4" />
-                <h3 className="text-2xl font-bold text-green-600 mb-2">¡Excelente!</h3>
-                {currentChallenge === challenges.length - 1 ? (
-                  <>
-                    <p className="text-gray-600 mb-4">¡Bien hecho! Has completado todos los desafíos de organización jerárquica</p>
-                    <div className="text-3xl font-bold text-green-600 mb-6">{challengeResults[challengeResults.length - 1].percentage}%</div>
-                    <button
-                      onClick={() => {
-                        completeLevel(4)
-                        setShowResults(false)
-                        setTimeout(() => {
-                          navigate('/achievement/4')
-                        }, 300)
-                      }}
-                      className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-6 py-3 rounded-lg font-bold hover:from-purple-600 hover:to-purple-800 transition-all duration-300"
-                    >
-                      Reclamar Insignia
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-gray-600 mb-4">Has organizado correctamente el {challenges[currentChallenge].title}</p>
-                    <div className="text-3xl font-bold text-green-600">{challengeResults[challengeResults.length - 1].percentage}%</div>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <FontAwesomeIcon icon={faTimesCircle} className="text-6xl text-red-500 mb-4" />
-                <h3 className="text-2xl font-bold text-red-600 mb-2">Casi lo logras</h3>
-                <p className="text-gray-600 mb-4">Revisa la organización e inténtalo de nuevo</p>
-                <div className="text-3xl font-bold text-red-600">{challengeResults[challengeResults.length - 1].percentage}%</div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

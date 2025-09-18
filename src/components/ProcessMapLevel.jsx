@@ -8,7 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '../context/AppContext';
-import Confetti from './Confetti';
+
 
 const ProcessMapLevel = () => {
   const navigate = useNavigate();
@@ -735,8 +735,7 @@ const ProcessMapLevel = () => {
         </AnimatePresence>
       </div>
 
-      {/* Confetti de celebración */}
-      {showCelebration && <Confetti />}
+
     </div>
   );
 };
